@@ -1,0 +1,8 @@
+<resources>
+
+    <string name="app_name">TranslateApp</string>
+    <string name="translate_hint">Type to Translate</string>
+    <string name="status">Status</string>
+    <string name="pick_image_intent_text">Choose a Photo</string>
+
+</resources>
