@@ -8,12 +8,16 @@
 
     <application
         android:allowBackup="true"
-        android:name=".TranslateApplication"
         android:icon="@mipmap/ic_launcher"
+        android:name=".activities.TranslateApp"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activities.MainActivity">
+        <activity
+            android:name=".activities.MainActivity"
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -21,11 +25,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".activities.SettingsActivity">
-        </activity>
-
         <service android:name="com.twilio.client.TwilioClientService"
                  android:exported="false" android:stopWithTask="true"/>
+
     </application>
 
 </manifest>

@@ -3,6 +3,33 @@
 
     <item
         is-multidex="true"
+        jar="/Users/Paul/Desktop/CodeBases/upwork/TranslateApp/app/build/intermediates/exploded-aar/com.android.support/recyclerview-v7/23.4.0/jars/classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="23.0.3"
+        sha1="ec75036c3c52e451d0cde50a5aedaf5fd32354a0">
+        <dex dex="/Users/Paul/Desktop/CodeBases/upwork/TranslateApp/app/build/intermediates/transforms/dex/debug/folders/1000/10/com.android.support-recyclerview-v7-23.4.0_cbd6f997e86c8cdea4fe6814cb90dbe35bb853aa/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/Paul/Desktop/CodeBases/upwork/TranslateApp/app/build/intermediates/exploded-aar/com.android.support/design/23.4.0/jars/classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="23.0.3"
+        sha1="5326d9a850d491714fef8cbfaa9ea3416f0bf0d2">
+        <dex dex="/Users/Paul/Desktop/CodeBases/upwork/TranslateApp/app/build/intermediates/transforms/dex/debug/folders/1000/10/com.android.support-design-23.4.0_2557b67feafcaff2e34fc1857e4ed5c204722fac/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/Paul/Desktop/CodeBases/upwork/TranslateApp/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.4.0/jars/classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="23.0.3"
+        sha1="548f06de403a9409f00554b3ee12a9fdea0e236c">
+        <dex dex="/Users/Paul/Desktop/CodeBases/upwork/TranslateApp/app/build/intermediates/transforms/dex/debug/folders/1000/10/com.android.support-appcompat-v7-23.4.0_4ec98dead4505478dd7a3472777bb1a0b22f14f7/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
         jar="/Users/Paul/Desktop/CodeBases/upwork/TranslateApp/app/build/intermediates/exploded-aar/com.android.support/animated-vector-drawable/23.4.0/jars/classes.jar"
         jumboMode="true"
         optimize="true"
@@ -18,33 +45,6 @@
         revision="23.0.3"
         sha1="ffbe55fdb2bb456b1485831706a9eac3300bb6b8">
         <dex dex="/Users/Paul/Desktop/CodeBases/upwork/TranslateApp/app/build/intermediates/transforms/dex/debug/folders/1000/10/support-annotations-23.4.0_6edf3c8c27297243570918fcec0cf2f923bc10d4/classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="/Users/Paul/Desktop/CodeBases/upwork/TranslateApp/app/build/intermediates/exploded-aar/com.android.support/support-vector-drawable/23.4.0/jars/classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.3"
-        sha1="c2c594cace5d83a3227b2b6e658ecbfd586d3ed9">
-        <dex dex="/Users/Paul/Desktop/CodeBases/upwork/TranslateApp/app/build/intermediates/transforms/dex/debug/folders/1000/10/com.android.support-support-vector-drawable-23.4.0_5e993ada364a17e38f8902ee3bf46979925a3297/classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="/Users/Paul/Desktop/CodeBases/upwork/TranslateApp/app/build/intermediates/incremental-classes/debug/instant-run-bootstrap.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.3"
-        sha1="fb6fc696bc5b502959fb68b7dd016e680f0259bd">
-        <dex dex="/Users/Paul/Desktop/CodeBases/upwork/TranslateApp/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run-bootstrap_950394bb3ea294202f2912488bc624aada8b12ab/classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="/Users/Paul/Desktop/CodeBases/upwork/TranslateApp/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.4.0/jars/classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.3"
-        sha1="548f06de403a9409f00554b3ee12a9fdea0e236c">
-        <dex dex="/Users/Paul/Desktop/CodeBases/upwork/TranslateApp/app/build/intermediates/transforms/dex/debug/folders/1000/10/com.android.support-appcompat-v7-23.4.0_4ec98dead4505478dd7a3472777bb1a0b22f14f7/classes.dex" />
     </item>
     <item
         is-multidex="true"
@@ -66,6 +66,24 @@
     </item>
     <item
         is-multidex="true"
+        jar="/Users/Paul/Desktop/CodeBases/upwork/TranslateApp/app/build/intermediates/exploded-aar/com.android.support/support-vector-drawable/23.4.0/jars/classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="23.0.3"
+        sha1="c2c594cace5d83a3227b2b6e658ecbfd586d3ed9">
+        <dex dex="/Users/Paul/Desktop/CodeBases/upwork/TranslateApp/app/build/intermediates/transforms/dex/debug/folders/1000/10/com.android.support-support-vector-drawable-23.4.0_5e993ada364a17e38f8902ee3bf46979925a3297/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/Paul/Desktop/CodeBases/upwork/TranslateApp/app/build/intermediates/incremental-classes/debug/instant-run-bootstrap.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="23.0.3"
+        sha1="889c295bc7e9135043316068ea8fcb8c56f299ab">
+        <dex dex="/Users/Paul/Desktop/CodeBases/upwork/TranslateApp/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run-bootstrap_950394bb3ea294202f2912488bc624aada8b12ab/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
         jar="/Users/Paul/Desktop/CodeBases/upwork/TranslateApp/app/build/intermediates/exploded-aar/com.android.volley/volley/1.0.0/jars/classes.jar"
         jumboMode="true"
         optimize="true"
@@ -79,7 +97,7 @@
         jumboMode="true"
         optimize="true"
         revision="23.0.3"
-        sha1="3459b1ea89ecf0a3e796cb4d633fecea1d150f09">
+        sha1="2e433de25977223471873015c8acfcecfe605461">
         <dex dex="/Users/Paul/Desktop/CodeBases/upwork/TranslateApp/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run_ae949908db2e146e217d829369c03b7cc5aab1de/classes.dex" />
     </item>
     <item

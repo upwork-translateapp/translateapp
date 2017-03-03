@@ -1,8 +1,25 @@
 <resources>
-
     <string name="app_name">TranslateApp</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_call_help">Call a Translation Professional?</string>
+    <string name="settings">Settings</string>
+    <string name="camera">Camera</string>
+
     <string name="translate_hint">Type to Translate</string>
     <string name="status">Status</string>
     <string name="pick_image_intent_text">Choose a Photo</string>
+    <string name="translate">Translate</string>
+    <string name="clear">Clear</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="user_lang">User Lang:</string>
+    <string name="translate_lang">Translate Lang:</string>
+    <string name="pick_lang">Pick a language</string>
+    <string name="ocr_text">OCR Text</string>
 
 </resources>

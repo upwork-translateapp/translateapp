@@ -2,20 +2,12 @@ package android.yogi.com.translateapp.activities;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.yogi.com.translateapp.R;
-import android.yogi.com.translateapp.consts.Consts;
-import android.yogi.com.translateapp.consts.Json;
-import android.yogi.com.translateapp.utils.ImagePicker;
-import android.yogi.com.translateapp.utils.Utils;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -29,106 +21,58 @@ import org.json.JSONObject;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 
-public class MainActivity extends BaseActivity {
+import consts.Consts;
+import consts.Json;
+import consts.Urls;
+import consts.Urls.RequestType;
+import fragments.PictureFragment;
+import fragments.TranslateFragment;
+import utils.ImagePicker;
+import utils.Utils;
+
+public class MainActivity extends BaseActivity implements TranslateFragment.OnFragmentInteractionListener{
 
     private static final String LOG_TAG = MainActivity.class.getName();
 
-    private EditText translateEt;
-    private TextView translatedTv;
-    private TextView statusTv;
-
-    private ImageView iSpeakIcon;
-    private ImageView uSpeakIcon;
-    private ImageView cameraIcon;
-    private ImageView helpIcon;
-
-    private ImageView hamburgerIcon;
-    private ImageView settingsIcon;
-
     private static final int PICK_IMAGE_ID = 123;
+
+    public static ArrayList<String> langs = new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        setViews();
+        setupPageLayout();
 
-        //String apiUrl = PropertyReader.getConfigValue(this, "client_id");
+        launchTranslateFragment();
+
+        callGoogleForLangs();
+    }
+
+    private void launchTranslateFragment() {
+        try {
+            Fragment fragment = (Fragment) TranslateFragment.newInstance("", "");
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager.beginTransaction().replace(R.id.flContent, fragment).commit();
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "launchTranslateFragment: ", e);
+        }
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri){
 
     }
 
-
-    private void setViews() {
-        statusTv = (TextView) findViewById(R.id.statusTv);
-
-        hamburgerIcon = (ImageView) findViewById(R.id.hamburgerIcon);
-        hamburgerIcon.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
-
-        settingsIcon = (ImageView) findViewById(R.id.settingsIcon);
-        settingsIcon.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(MainActivity.this, SettingsActivity.class);
-                startActivity(i);
-            }
-        });
-
-        translateEt = (EditText) findViewById(R.id.translateEt);
-        translatedTv = (TextView) findViewById(R.id.translatedTv);
-        translatedTv.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                translateText();
-            }
-        });
-
-        iSpeakIcon = (ImageView) findViewById(R.id.iSpeakIcon);
-        iSpeakIcon.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getTextFromVoice(true);
-            }
-        });
-
-        uSpeakIcon = (ImageView) findViewById(R.id.uSpeakIcon);
-        uSpeakIcon.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getTextFromVoice(false);
-            }
-        });
-
-        cameraIcon = (ImageView) findViewById(R.id.cameraIcon);
-        cameraIcon.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent chooseImageIntent = ImagePicker.getPickImageIntent(MainActivity.this);
-                startActivityForResult(chooseImageIntent, PICK_IMAGE_ID);
-            }
-        });
-
-        helpIcon = (ImageView) findViewById(R.id.helpIcon);
-        helpIcon.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String number = "tel:" + Consts.HELP_PHONE_NUMBER;
-                Intent callIntent = new Intent(Intent.ACTION_CALL, Uri.parse(number));
-
-                if(Utils.checkCallPhonePermission()) {
-                    startActivity(callIntent);
-                }
-            }
-        });
+    public void getPicture () {
+        Intent chooseImageIntent = ImagePicker.getPickImageIntent(MainActivity.this);
+        startActivityForResult(chooseImageIntent, PICK_IMAGE_ID);
     }
 
-    private void getTextFromVoice(boolean primaryLanguage) {
+    public void getTextFromVoice(boolean primaryLanguage) {
         if(primaryLanguage) {
 
         } else {
@@ -136,21 +80,18 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    private void translateText() {
-        String text = translateEt.getText().toString();
-        callGoogleToTranslate(text, "es");
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch(requestCode) {
             case PICK_IMAGE_ID:
                 Bitmap bitmap = ImagePicker.getImageFromResult(this, resultCode, data);
+                if(bitmap != null && getSupportFragmentManager().findFragmentById(R.id.flContent) instanceof PictureFragment) {
+                    PictureFragment pFrag = (PictureFragment)
+                            getSupportFragmentManager().findFragmentById(R.id.flContent);
+                    pFrag.setImageView(bitmap);
 
-                //Sample image for testing.
-                Bitmap icon = BitmapFactory.decodeResource(getResources(),R.drawable.spanish_pic);
-
-                callGoogleOcr(bitmap);
+                    callGoogleOcr(bitmap);
+                }
                 break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);
@@ -158,19 +99,77 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    private void callGoogleToTranslate(String text, String requestedLang) {
+    public void callGoogleToTranslate(String text, String requestedLang) {
         try {
-            String encoded = Utils.encodeParameter(text);
-            URL url = new URL("https://www.googleapis.com/language/translate/v2?key=" + Consts.GOOGLE_API_KEY + "&target=" + requestedLang + "&q=" + encoded);
+            String encodedText = Utils.encodeParameter(text);
+            String urlParams = "?key=" + Consts.GOOGLE_TRANSLATE_API_KEY + "&target=" + requestedLang + "&q=" + encodedText;
+            URL url = new URL(Urls.GOOGLE_TRANSLATE + urlParams);
             String strUrl = url.toString();
 
-            makeAPIRequest(strUrl);
+            makeAPIRequest(strUrl, RequestType.TRANSLATE);
         } catch (MalformedURLException e){
             Log.e(LOG_TAG, "callGoogleToTranslate: ", e);
         }
     }
 
-    private void makeAPIRequest(String url) {
+    public void callGoogleForLangs() {
+        makeAPIRequest(Urls.GOOGLE_LANGS, RequestType.LANGS);
+    }
+
+    private void handleLangsResponse(String response) {
+        /**
+         * {
+         "data": {
+         "languages": [
+         {
+         "language": "af"
+         },
+         */
+        try {
+            JSONObject jsonObj = new JSONObject(response);
+            JSONObject dataObj = jsonObj.getJSONObject(Json.DATA);
+            JSONArray languages = dataObj.getJSONArray(Json.LANGUAGES);
+            for (int i = 0; i < languages.length(); i++) {
+                JSONObject language = languages.getJSONObject(i);
+                String lang = language.getString(Json.LANGUAGE);
+                langs.add(lang);
+            }
+        } catch(Exception e) {
+            Log.e(LOG_TAG, "handleTranslateResponse: ", e);
+        }
+
+        Log.e(LOG_TAG, response);
+    }
+
+    private void handleTranslateResponse(String response){
+        /**
+         Sample Response from Google Translate API
+         {
+         "data": {
+             "translations": [
+                 {
+                 "translatedText": "Pruebas",
+                 "detectedSourceLanguage": "en"
+                 }
+             ]
+             }
+         }
+         */
+        try {
+            JSONObject jsonObj = new JSONObject(response);
+            JSONObject dataObj = jsonObj.getJSONObject(Json.DATA);
+            JSONArray translations = dataObj.getJSONArray(Json.TRANSLATIONS);
+            JSONObject translation = (JSONObject) translations.get(0);
+            String translatedText = (String) translation.get(Json.TRANSLATED_TEXT);
+            String detectedSrcLang = (String) translation.get(Json.DETECTED_SRC_LANG);
+
+            updateTranslatedUi(translatedText);
+        } catch(Exception e) {
+            Log.e(LOG_TAG, "handleTranslateResponse: ", e);
+        }
+    }
+
+    public void makeAPIRequest(String url, final RequestType lang) {
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(this);
 
@@ -179,32 +178,10 @@ public class MainActivity extends BaseActivity {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        /**
-                         Sample Response from Google Translate API
-                         {
-                            "data": {
-                                "translations": [
-                                {
-                                 "translatedText": "Pruebas",
-                                 "detectedSourceLanguage": "en"
-                                 }
-                                ]
-                            }
-                         }
-                         */
-
-                        try {
-                            JSONObject jsonObj = new JSONObject(response);
-                            JSONObject dataObj = jsonObj.getJSONObject(Json.DATA);
-                            JSONArray translations = dataObj.getJSONArray(Json.TRANSLATIONS);
-                            JSONObject translation = (JSONObject) translations.get(0);
-                            String translatedText = (String) translation.get(Json.TRANSLATED_TEXT);
-                            String detectedSrcLang = (String) translation.get(Json.DETECTED_SRC_LANG);
-
-                            translatedTv.setText("");
-                            translatedTv.setText(translatedText);
-                        } catch(Exception e) {
-                            Log.e(LOG_TAG, "onResponse: ", e);
+                        if(RequestType.LANGS.ordinal() == lang.ordinal()) {
+                            handleLangsResponse(response);
+                        } else if(RequestType.TRANSLATE.ordinal() == lang.ordinal()) {
+                            handleTranslateResponse(response);
                         }
                     }
                 }, new Response.ErrorListener() {
@@ -217,7 +194,20 @@ public class MainActivity extends BaseActivity {
         queue.add(stringRequest);
     }
 
-    private void callGoogleOcr(Bitmap bitmap) {
+    private void updateTranslatedUi(String translatedText) {
+        if(getSupportFragmentManager().findFragmentById(R.id.flContent) instanceof TranslateFragment) {
+            TranslateFragment frag = (TranslateFragment)
+                    getSupportFragmentManager().findFragmentById(R.id.flContent);
+            frag.updateTranslatedUi(translatedText);
+        }
+    }
 
+    public void callGoogleOcr(Bitmap bitmap) {
+        if(getSupportFragmentManager().findFragmentById(R.id.flContent) instanceof TranslateFragment) {
+            String ocrText = "";
+            PictureFragment frag = (PictureFragment)
+                    getSupportFragmentManager().findFragmentById(R.id.flContent);
+            frag.setOcrText(ocrText);
+        }
     }
 }

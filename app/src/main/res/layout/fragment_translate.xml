@@ -1,0 +1,110 @@
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="fragments.TranslateFragment">
+
+    <LinearLayout
+        android:id="@+id/content_main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/background"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="10dp"
+            android:orientation="vertical"
+            android:weightSum="10">
+
+            <LinearLayout
+                android:id="@+id/top_layout"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="6"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_gravity="center_horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <Button
+                        android:id="@+id/translateBtn"
+                        android:layout_marginRight="20dp"
+                        android:text="@string/translate"
+                        android:textSize="12sp"
+                        android:layout_width="100dp"
+                        android:layout_height="50dp"/>
+
+                    <Button
+                        android:id="@+id/clearBtn"
+                        android:text="@string/clear"
+                        android:textSize="12sp"
+                        android:layout_marginRight="20dp"
+                        android:layout_width="100dp"
+                        android:layout_height="50dp"/>
+
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/translateEt"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:hint="@string/translate_hint"
+                    android:background="@drawable/border"
+                    android:padding="10dp"
+                    android:inputType="textMultiLine|textNoSuggestions"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="@android:color/white"
+                    android:textSize="12dp"/>
+
+                <TextView
+                    android:id="@+id/translatedTv"
+                    android:layout_marginTop="10dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="10dp"
+                    android:textColor="@android:color/white"
+                    android:text=""
+                    android:background="@drawable/border"
+                    android:maxLines="10"
+                    android:textSize="12dp" />
+
+            </LinearLayout>
+
+            <RelativeLayout
+                android:id="@+id/buttons"
+                android:layout_width="match_parent"
+                android:layout_weight="3"
+                android:layout_marginTop="10dp"
+                android:layout_height="0dp">
+
+                <ImageView
+                    android:id="@+id/iSpeakIcon"
+                    android:layout_width="75dp"
+                    android:layout_height="75dp"
+                    android:layout_centerHorizontal="true"
+                    android:layout_margin="10dp"
+                    android:src="@drawable/ispeak"
+                    />
+
+                <Switch
+                    android:id="@+id/langSwitch"
+                    android:layout_below="@+id/iSpeakIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:text="" />
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>
