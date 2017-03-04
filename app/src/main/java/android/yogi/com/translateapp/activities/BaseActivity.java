@@ -16,7 +16,6 @@ import android.view.MenuItem;
 import android.yogi.com.translateapp.R;
 
 import consts.Consts;
-import fragments.PictureFragment;
 import fragments.SettingsFragment;
 import fragments.TranslateFragment;
 import utils.Utils;
@@ -63,15 +62,20 @@ public abstract class BaseActivity extends AppCompatActivity implements Navigati
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_help : {
-                makePhoneCall();
+            case R.id.action_clear : {
+                if(getSupportFragmentManager().findFragmentById(R.id.flContent) instanceof TranslateFragment) {
+                    TranslateFragment tFrag = (TranslateFragment)
+                            getSupportFragmentManager().findFragmentById(R.id.flContent);
+                    tFrag.clearTranslationBoxes();
+                }
+
                 return true;
             }
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void makePhoneCall() {
+    public void makePhoneCall() {
         Log.e(LOG_TAG, "make phone call");
 
         String number = "tel:" + Consts.HELP_PHONE_NUMBER;
@@ -87,9 +91,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Navigati
         int id = item.getItemId();
         Fragment fragment = null;
         Class fragmentClass = null;
-        if (id == R.id.nav_camera) {
-            fragmentClass = PictureFragment.class;
-        } else if (id == R.id.nav_settings) {
+        if (id == R.id.nav_settings) {
             fragmentClass = SettingsFragment.class;
         } else if (id == R.id.nav_translate) {
             fragmentClass = TranslateFragment.class;

@@ -13,6 +13,7 @@
     <string name="pick_image_intent_text">Choose a Photo</string>
     <string name="translate">Translate</string>
     <string name="clear">Clear</string>
+    <string name="firebase_upload">Save Transcript</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
@@ -21,5 +22,13 @@
     <string name="translate_lang">Translate Lang:</string>
     <string name="pick_lang">Pick a language</string>
     <string name="ocr_text">OCR Text</string>
+
+    <string name="error">Error</string>
+    <string name="ok">OK</string>
+    <string name="text_from_speech">Text From Speech:</string>
+    <string name="translated_speech">Translated Speech:</string>
+    <string name="no_speech_recognition">Speech Recognition Not Found on device!</string>
+
+    <string name="clear_translation">Clear Translation</string>
 
 </resources>

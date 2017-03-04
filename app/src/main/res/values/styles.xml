@@ -23,7 +23,9 @@
     <!-- styles -->
 
     <style name="OverFlowIcon" parent="@android:style/Widget.Holo.ActionButton.Overflow">
+        <!--
         <item name="android:src">@drawable/help</item>
+        -->
     </style>
 
 </resources>

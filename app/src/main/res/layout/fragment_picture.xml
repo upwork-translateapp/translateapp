@@ -24,16 +24,25 @@
                 />
 
             <TextView
-                android:id="@+id/textTv"
-                android:layout_marginTop="20dp"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:textColor="@android:color/black"
-                android:text="@string/ocr_text"
-                android:background="@drawable/border"
-                android:maxLines="3"
-                android:textSize="18sp" />
+                    android:id="@+id/textTv"
+                    android:layout_width="100dp"
+                    android:layout_height="50dp"
+                    android:textColor="@android:color/black"
+                    android:text="@string/ocr_text"
+                    android:layout_marginTop="20dp"
+                    android:layout_gravity="center_vertical"
+                    android:background="@drawable/border"
+                    android:maxLines="3"
+                    android:textSize="18sp" />
 
+                <Button
+                    android:id="@+id/fireBaseBtn"
+                    android:text="@string/firebase_upload"
+                    android:textSize="12sp"
+                    android:layout_marginTop="20dp"
+                    android:layout_width="100dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_height="50dp"/>
         </LinearLayout>
 
     </RelativeLayout>

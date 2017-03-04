@@ -28,52 +28,44 @@
                 android:layout_weight="6"
                 android:orientation="vertical">
 
-                <LinearLayout
-                    android:layout_gravity="center_horizontal"
-                    android:layout_width="wrap_content"
+                <RelativeLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
                     <Button
                         android:id="@+id/translateBtn"
-                        android:layout_marginRight="20dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_alignParentRight="true"
                         android:text="@string/translate"
                         android:textSize="12sp"
                         android:layout_width="100dp"
                         android:layout_height="50dp"/>
 
-                    <Button
-                        android:id="@+id/clearBtn"
-                        android:text="@string/clear"
-                        android:textSize="12sp"
-                        android:layout_marginRight="20dp"
-                        android:layout_width="100dp"
-                        android:layout_height="50dp"/>
+                    <EditText
+                        android:id="@+id/translateEt"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:hint="@string/translate_hint"
+                        android:background="@drawable/border"
+                        android:padding="10dp"
+                        android:layout_toLeftOf="@+id/translateBtn"
+                        android:inputType="textMultiLine|textNoSuggestions"
+                        android:textColor="@android:color/white"
+                        android:textColorHint="@android:color/white"
+                        android:textSize="12dp"/>
 
-                </LinearLayout>
+                </RelativeLayout>
 
-                <EditText
-                    android:id="@+id/translateEt"
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:hint="@string/translate_hint"
-                    android:background="@drawable/border"
-                    android:padding="10dp"
-                    android:inputType="textMultiLine|textNoSuggestions"
-                    android:textColor="@android:color/white"
-                    android:textColorHint="@android:color/white"
-                    android:textSize="12dp"/>
-
-                <TextView
-                    android:id="@+id/translatedTv"
+                <ListView
+                    android:id="@+id/listview"
                     android:layout_marginTop="10dp"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:padding="10dp"
                     android:textColor="@android:color/white"
                     android:text=""
-                    android:background="@drawable/border"
-                    android:maxLines="10"
-                    android:textSize="12dp" />
+                    android:background="@drawable/border"/>
 
             </LinearLayout>
 
@@ -88,18 +80,41 @@
                     android:id="@+id/iSpeakIcon"
                     android:layout_width="75dp"
                     android:layout_height="75dp"
-                    android:layout_centerHorizontal="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
                     android:layout_margin="10dp"
                     android:src="@drawable/ispeak"
                     />
 
-                <Switch
-                    android:id="@+id/langSwitch"
-                    android:layout_below="@+id/iSpeakIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                <ImageView
+                    android:id="@+id/uSpeakIcon"
+                    android:layout_width="75dp"
+                    android:layout_height="75dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_margin="10dp"
+                    android:src="@drawable/uspeak"
+                    />
+
+                <ImageView
+                    android:id="@+id/helpIcon"
+                    android:layout_width="75dp"
+                    android:layout_height="75dp"
+                    android:layout_alignParentTop="true"
                     android:layout_centerHorizontal="true"
-                    android:text="" />
+                    android:layout_margin="10dp"
+                    android:src="@drawable/help"
+                    />
+
+                <ImageView
+                    android:id="@+id/cameraIcon"
+                    android:layout_width="75dp"
+                    android:layout_height="75dp"
+                    android:layout_below="@+id/helpIcon"
+                    android:layout_centerHorizontal="true"
+                    android:layout_margin="10dp"
+                    android:src="@drawable/camera"
+                    />
 
             </RelativeLayout>
 

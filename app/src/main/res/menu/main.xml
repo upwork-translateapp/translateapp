@@ -3,10 +3,10 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/action_help"
+        android:id="@+id/action_clear"
         android:orderInCategory="0"
         android:icon="@drawable/help"
-        android:title="@string/action_call_help"
+        android:title="@string/clear_translation"
         />
 
 </menu>

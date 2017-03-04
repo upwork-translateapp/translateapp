@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.yogi.com.translateapp.R;
@@ -35,6 +36,8 @@ public class PictureFragment extends Fragment {
 
     private ImageView cameraIv;
     private TextView textTv;
+
+    private Button fireBaseBtn;
 
     private TranslateFragment.OnFragmentInteractionListener mListener;
 
@@ -79,6 +82,8 @@ public class PictureFragment extends Fragment {
 
         cameraIv = (ImageView) view.findViewById(R.id.cameraIv);
         textTv = (TextView) view.findViewById(R.id.textTv);
+        fireBaseBtn = (Button) view.findViewById(R.id.fireBaseBtn);
+
         Bitmap icon = BitmapFactory.decodeResource(getResources(),R.drawable.camera);
         cameraIv.setOnClickListener(new OnClickListener() {
             @Override

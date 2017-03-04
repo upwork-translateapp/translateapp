@@ -1,23 +1,27 @@
 package fragments;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Switch;
-import android.widget.TextView;
+import android.widget.ListView;
 import android.yogi.com.translateapp.R;
 import android.yogi.com.translateapp.activities.MainActivity;
 import android.yogi.com.translateapp.activities.TranslateApp;
+import android.yogi.com.translateapp.activities.adapters.TranslationAdapter;
+import android.yogi.com.translateapp.activities.data.OcrObj;
+import android.yogi.com.translateapp.activities.data.TranslationObj;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -29,6 +33,8 @@ import android.yogi.com.translateapp.activities.TranslateApp;
  */
 public class TranslateFragment extends BaseFragment {
 
+    private static final String LOG_TAG = TranslateFragment.class.getName();
+
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     protected static final String ARG_PARAM1 = "param1";
@@ -39,16 +45,20 @@ public class TranslateFragment extends BaseFragment {
     private String mParam2;
 
     private EditText translateEt;
-    private TextView translatedTv;
 
-    private ImageView speakIcon;
+    private ImageView iSpeakIcon;
+    private ImageView uSpeakIcon;
+    private ImageView helpIcon;
+    private ImageView cameraIcon;
 
     private Button translateBtn;
-    private Button clearBtn;
-
-    private Switch langSwitch;
 
     private OnFragmentInteractionListener mListener;
+
+    private ListView listview;
+
+    // get data from the table by the ListAdapter
+    private TranslationAdapter listAdapter;
 
     public TranslateFragment() {
         // Required empty public constructor
@@ -62,7 +72,6 @@ public class TranslateFragment extends BaseFragment {
      * @param param2 Parameter 2.
      * @return A new instance of fragment TranslateFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static TranslateFragment newInstance(String param1, String param2) {
         TranslateFragment fragment = new TranslateFragment();
         Bundle args = new Bundle();
@@ -83,20 +92,16 @@ public class TranslateFragment extends BaseFragment {
         }
     }
 
-    private void setSwitchText(boolean isChecked) {
-        //check the current state before we display the screen
-        if(isChecked){
-            String userLang = TranslateApp.getInstance().getUserLang();
-            langSwitch.setText(userLang);
-        } else {
-            String transLang = TranslateApp.getInstance().getTransLang();
-            langSwitch.setText(transLang);
-        }
+    public void clearTranslationBoxes() {
+        listAdapter.clear();
+        listAdapter.notifyDataSetChanged();
+        translateEt.setText("");
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_translate, container, false);
 
@@ -105,50 +110,72 @@ public class TranslateFragment extends BaseFragment {
             @Override
             public void onClick(View v) {
                 String text = translateEt.getText().toString();
+                addTranslateFromRow(text);
+
                 MainActivity activity = (MainActivity) getActivity();
-                activity.callGoogleToTranslate(text, "es");
-            }
-        });
-
-        clearBtn = (Button) view.findViewById(R.id.clearBtn);
-        clearBtn.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                translatedTv.setText("");
-                translateEt.setText("");
-            }
-        });
-
-        langSwitch = (Switch) view.findViewById(R.id.langSwitch);
-        langSwitch.setChecked(true);
-        setSwitchText(langSwitch.isChecked());
-
-        //attach a listener to check for changes in state
-        langSwitch.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView,
-                                         boolean isChecked) {
-                setSwitchText(isChecked);
+                activity.callGoogleToTranslate(text);
             }
         });
 
         translateEt = (EditText) view.findViewById(R.id.translateEt);
 
-        translatedTv = (TextView) view.findViewById(R.id.translatedTv);
-        translatedTv.setOnClickListener(new OnClickListener() {
+        iSpeakIcon = (ImageView) view.findViewById(R.id.iSpeakIcon);
+        iSpeakIcon.setOnTouchListener(new OnTouchListener() {
             @Override
-            public void onClick(View v) {
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    MainActivity activity = (MainActivity) getActivity();
+                    activity.getTextFromVoice(true);
+                } else if (event.getAction() == MotionEvent.ACTION_UP){
+                    MainActivity activity = (MainActivity) getActivity();
+                    activity.stopListening();
+                }
+                return true;
             }
         });
 
-        speakIcon = (ImageView) view.findViewById(R.id.iSpeakIcon);
-        speakIcon.setOnClickListener(new OnClickListener() {
+        uSpeakIcon = (ImageView) view.findViewById(R.id.uSpeakIcon);
+        uSpeakIcon.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    MainActivity activity = (MainActivity) getActivity();
+                    activity.getTextFromVoice(false);
+                } else if (event.getAction() == MotionEvent.ACTION_UP){
+                    MainActivity activity = (MainActivity) getActivity();
+                    activity.stopListening();
+                }
+                return true;
+            }
+        });
+
+        helpIcon = (ImageView) view.findViewById(R.id.helpIcon);
+        helpIcon.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 MainActivity activity = (MainActivity) getActivity();
-                activity.getTextFromVoice(true);
+                activity.makePhoneCall();
             }
         });
+
+        cameraIcon = (ImageView) view.findViewById(R.id.cameraIcon);
+        cameraIcon.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity activity = (MainActivity) getActivity();
+                activity.getPicture();
+            }
+        });
+
+        Bitmap icon = BitmapFactory.decodeResource(getResources(),R.drawable.camera);
+        cameraIcon.setImageBitmap(icon);
+
+        listview = (ListView) view.findViewById(R.id.listview);
+
+        // get data from the table by the ListAdapter
+        listAdapter = new TranslationAdapter();
+
+        listview.setAdapter(listAdapter);
 
         return view;
     }
@@ -191,8 +218,39 @@ public class TranslateFragment extends BaseFragment {
         void onFragmentInteraction(Uri uri);
     }
 
-    public void updateTranslatedUi(String translatedText) {
-        translatedTv.setText("");
-        translatedTv.setText(translatedText);
+    public void addTranslateFromRow(String text) {
+        addTranslateFromRow(TranslateApp.getInstance().getUserLang(), text);
+    }
+
+    public void addTranslateFromRow(String lang, String text) {
+        String display = "{" + lang + "} - " + text;
+        TranslationObj transObj = new TranslationObj(display);
+        listAdapter.addRow(transObj);
+    }
+
+    public void addTranslateToRow(String text) {
+        addTranslateToRow(TranslateApp.getInstance().getTransLang(), text);
+    }
+
+    public void addTranslateToRow(String lang, String text) {
+        String display = makeTranslateStr(lang, text);
+        TranslationObj transObj = new TranslationObj(display);
+        listAdapter.addRow(transObj);
+    }
+
+    public void addOcrRow(Bitmap bm, String ocr, String fromLang, String toLang) {
+        String display = makeOcrStr(ocr, fromLang, toLang);
+        OcrObj transObj = new OcrObj(bm, display);
+        listAdapter.addRow(transObj);
+    }
+
+    public String makeTranslateStr(String lang, String text) {
+        String display = "> {" + lang + "} - " + text;
+        return display;
+    }
+
+    public String makeOcrStr(String ocr, String fromLang, String toLang) {
+        String display = "{" + fromLang + "} > {" + toLang + "} - " + ocr;
+        return display;
     }
 }
