@@ -1,4 +1,4 @@
-package fragments;
+package android.yogi.com.translateapp.fragments;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -14,6 +14,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.yogi.com.translateapp.R;
 import android.yogi.com.translateapp.activities.TranslateApp;
+
+import java.util.Locale;
 
 import static android.yogi.com.translateapp.activities.MainActivity.langs;
 
@@ -100,11 +102,18 @@ public class SettingsFragment extends BaseFragment {
         return view;
     }
 
+    private String getLanguageName(String code) {
+        Locale loc = new Locale(code);
+        String name = loc.getDisplayLanguage(loc); // English
+        return name;
+    }
+
     private void displayLangs(final TextView view) {
         CharSequence charLangs[] = new CharSequence[langs.size()];
 
         for (int i = 0; i < langs.size(); i++) {
-            String lang = langs.get(i);
+            String langCode = langs.get(i);
+            String lang = langs.get(i) + " - " + getLanguageName(langCode);
             charLangs[i] = lang;
         }
 
@@ -116,10 +125,12 @@ public class SettingsFragment extends BaseFragment {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String lang = langs.get(which);
+                String [] pieces = lang.split(" - ");
+                String langCode = pieces[0].trim();
                 if(view == userLang) {
-                    TranslateApp.getInstance().setUserLang(lang);
+                    TranslateApp.getInstance().setUserLang(langCode);
                 } else if(view == translateLang) {
-                    TranslateApp.getInstance().setTransLang(lang);
+                    TranslateApp.getInstance().setTransLang(langCode);
                 }
                 view.setText(lang);
             }

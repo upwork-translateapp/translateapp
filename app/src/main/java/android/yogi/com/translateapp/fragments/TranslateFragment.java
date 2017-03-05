@@ -1,4 +1,4 @@
-package fragments;
+package android.yogi.com.translateapp.fragments;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -13,15 +13,17 @@ import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Switch;
 import android.yogi.com.translateapp.R;
 import android.yogi.com.translateapp.activities.MainActivity;
 import android.yogi.com.translateapp.activities.TranslateApp;
-import android.yogi.com.translateapp.activities.adapters.TranslationAdapter;
-import android.yogi.com.translateapp.activities.data.OcrObj;
-import android.yogi.com.translateapp.activities.data.TranslationObj;
+import android.yogi.com.translateapp.adapters.TranslationAdapter;
+import android.yogi.com.translateapp.data.OcrObj;
+import android.yogi.com.translateapp.data.TranslationObj;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -52,6 +54,7 @@ public class TranslateFragment extends BaseFragment {
     private ImageView cameraIcon;
 
     private Button translateBtn;
+    private Switch langSwitch;
 
     private OnFragmentInteractionListener mListener;
 
@@ -105,6 +108,20 @@ public class TranslateFragment extends BaseFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_translate, container, false);
 
+        langSwitch = (Switch) view.findViewById(R.id.langSwitch);
+        langSwitch.setText(TranslateApp.getInstance().getUserLang());
+        langSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                String userLang = TranslateApp.getInstance().getUserLang();
+                String transLang = TranslateApp.getInstance().getTransLang();
+
+                TranslateApp.getInstance().setUserLang(transLang);
+                TranslateApp.getInstance().setTransLang(userLang);
+
+                langSwitch.setText(transLang);
+            }
+        });
+
         translateBtn = (Button) view.findViewById(R.id.translateBtn);
         translateBtn.setOnClickListener(new OnClickListener() {
             @Override
@@ -154,7 +171,7 @@ public class TranslateFragment extends BaseFragment {
             @Override
             public void onClick(View v) {
                 MainActivity activity = (MainActivity) getActivity();
-                activity.makePhoneCall();
+                activity.launchTwilioActivity();
             }
         });
 

@@ -14,11 +14,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.yogi.com.translateapp.R;
-
-import consts.Consts;
-import fragments.SettingsFragment;
-import fragments.TranslateFragment;
-import utils.Utils;
+import android.yogi.com.translateapp.consts.Consts;
+import android.yogi.com.translateapp.fragments.SettingsFragment;
+import android.yogi.com.translateapp.fragments.TranslateFragment;
+import android.yogi.com.translateapp.utils.Utils;
 
 /**
  * Created by Paul on 3/2/17.
@@ -76,7 +75,6 @@ public abstract class BaseActivity extends AppCompatActivity implements Navigati
     }
 
     public void makePhoneCall() {
-        Log.e(LOG_TAG, "make phone call");
 
         String number = "tel:" + Consts.HELP_PHONE_NUMBER;
         Intent callIntent = new Intent(Intent.ACTION_CALL, Uri.parse(number));

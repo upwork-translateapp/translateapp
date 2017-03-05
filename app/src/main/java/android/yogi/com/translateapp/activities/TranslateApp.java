@@ -1,8 +1,7 @@
 package android.yogi.com.translateapp.activities;
 
 import android.app.Application;
-
-import consts.Consts;
+import android.yogi.com.translateapp.consts.Consts;
 
 /**
  * Created by Paul on 3/2/17.

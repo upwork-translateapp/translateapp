@@ -40,7 +40,17 @@
                         android:text="@string/translate"
                         android:textSize="12sp"
                         android:layout_width="100dp"
-                        android:layout_height="50dp"/>
+                        android:layout_height="40dp"/>
+
+                    <Switch
+                        android:id="@+id/langSwitch"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_below="@+id/translateBtn"
+                        android:textSize="12sp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
 
                     <EditText
                         android:id="@+id/translateEt"

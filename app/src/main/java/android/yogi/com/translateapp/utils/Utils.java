@@ -1,4 +1,4 @@
-package utils;
+package android.yogi.com.translateapp.utils;
 
 import android.content.pm.PackageManager;
 import android.util.Log;

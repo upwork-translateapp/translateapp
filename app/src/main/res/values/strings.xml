@@ -31,4 +31,15 @@
 
     <string name="clear_translation">Clear Translation</string>
 
+    <string name="update_capability">Update Capability</string>
+
+    <string name="welcome">Welcome to Twilio Client</string>
+
+    <string name="client_name">client name</string>
+    <string name="phone_number">phone number</string>
+
+    <string-array name="types">
+        <item>Client</item>
+        <item>Phone Number</item>
+    </string-array>
 </resources>

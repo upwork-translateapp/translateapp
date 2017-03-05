@@ -1,4 +1,4 @@
-package consts;
+package android.yogi.com.translateapp.consts;
 
 /**
  * Created by Paul on 3/2/17.

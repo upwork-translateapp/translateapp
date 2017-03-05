@@ -14,6 +14,12 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.yogi.com.translateapp.R;
+import android.yogi.com.translateapp.consts.Consts;
+import android.yogi.com.translateapp.consts.Json;
+import android.yogi.com.translateapp.consts.Urls;
+import android.yogi.com.translateapp.fragments.TranslateFragment;
+import android.yogi.com.translateapp.utils.ImagePicker;
+import android.yogi.com.translateapp.utils.Utils;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -36,15 +42,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
-import consts.Consts;
-import consts.Json;
-import consts.Urls;
-import consts.Urls.RequestType;
-import fragments.TranslateFragment;
-import utils.ImagePicker;
-import utils.Utils;
-
-public class MainActivity extends TwilioActivity implements TranslateFragment.OnFragmentInteractionListener{
+public class MainActivity extends BaseActivity implements TranslateFragment.OnFragmentInteractionListener{
 
     private static final String LOG_TAG = MainActivity.class.getName();
 
@@ -62,6 +60,7 @@ public class MainActivity extends TwilioActivity implements TranslateFragment.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
         setupPageLayout();
@@ -73,6 +72,11 @@ public class MainActivity extends TwilioActivity implements TranslateFragment.On
         sr = SpeechRecognizer.createSpeechRecognizer(this);
 
         mStorageRef = FirebaseStorage.getInstance().getReference();
+    }
+
+    public void launchTwilioActivity() {
+        Intent i = new Intent(MainActivity.this, TwilioActivity.class);
+        startActivity(i);
     }
 
     private String generateFileName(String dir){
@@ -275,14 +279,14 @@ public class MainActivity extends TwilioActivity implements TranslateFragment.On
             URL url = new URL(Urls.GOOGLE_TRANSLATE + urlParams);
             String strUrl = url.toString();
 
-            makeAPIRequest(strUrl, RequestType.TRANSLATE);
+            makeAPIRequest(strUrl, Urls.RequestType.TRANSLATE);
         } catch (MalformedURLException e){
             Log.e(LOG_TAG, "callGoogleToTranslate: ", e);
         }
     }
 
     public void callGoogleForLangs() {
-        makeAPIRequest(Urls.GOOGLE_LANGS, RequestType.LANGS);
+        makeAPIRequest(Urls.GOOGLE_LANGS, Urls.RequestType.LANGS);
     }
 
     private void handleLangsResponse(String response) {
@@ -339,7 +343,7 @@ public class MainActivity extends TwilioActivity implements TranslateFragment.On
         }
     }
 
-    public void makeAPIRequest(String url, final RequestType lang) {
+    public void makeAPIRequest(String url, final Urls.RequestType lang) {
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(this);
 
@@ -348,9 +352,9 @@ public class MainActivity extends TwilioActivity implements TranslateFragment.On
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        if(RequestType.LANGS.ordinal() == lang.ordinal()) {
+                        if(Urls.RequestType.LANGS.ordinal() == lang.ordinal()) {
                             handleLangsResponse(response);
-                        } else if(RequestType.TRANSLATE.ordinal() == lang.ordinal()) {
+                        } else if(Urls.RequestType.TRANSLATE.ordinal() == lang.ordinal()) {
                             handleTranslateResponse(response);
                         }
                     }

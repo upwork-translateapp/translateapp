@@ -1,4 +1,4 @@
-package android.yogi.com.translateapp.activities.data;
+package android.yogi.com.translateapp.data;
 
 import android.view.View;
 import android.view.ViewGroup;

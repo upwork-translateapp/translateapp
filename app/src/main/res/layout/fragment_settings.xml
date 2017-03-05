@@ -41,7 +41,7 @@
                 android:layout_height="50dp"
                 android:textColor="@android:color/black"
                 android:textSize="16dp"
-                android:text="@string/user_lang"/>
+                android:text="@string/translate_lang"/>
 
             <Button
                 android:id="@+id/translateLang"

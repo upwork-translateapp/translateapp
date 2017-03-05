@@ -1,4 +1,4 @@
-package utils;
+package android.yogi.com.translateapp.utils;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -8,8 +8,6 @@ import android.yogi.com.translateapp.R;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-
-import static android.content.ContentValues.TAG;
 
 /**
  * Created by Paul on 3/2/17.

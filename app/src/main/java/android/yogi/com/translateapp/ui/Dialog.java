@@ -1,17 +1,30 @@
-package android.yogi.com.translateapp.activities.ui;
+package android.yogi.com.translateapp.ui;
 
 /**
- * Created by Paul on 3/3/17.
+ * Created by Paul on 3/5/17.
  */
+
+import android.content.Context;
+import android.content.DialogInterface;
+import android.support.v7.app.AlertDialog;
+import android.text.InputType;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.Spinner;
+import android.yogi.com.translateapp.R;
+import android.yogi.com.translateapp.activities.TwilioActivity;
 
 /**
  * Created by tconnors on 3/4/16.
  */
-public class CallDialog {
+public class Dialog {
 
-    /*
     public static AlertDialog createRegisterDialog(DialogInterface.OnClickListener updateTokenClickListener, DialogInterface.OnClickListener cancelClickListener,
-                                                   MainActivity.ClientProfile clientProfile, Context context){
+                                                   TwilioActivity.ClientProfile clientProfile, Context context){
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
 
         alertDialogBuilder.setIcon(R.drawable.ic_update_black_24dp);
@@ -90,5 +103,4 @@ public class CallDialog {
 
         return alertDialogBuilder.create();
     }
-    */
 }

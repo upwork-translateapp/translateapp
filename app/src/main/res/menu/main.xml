@@ -9,4 +9,11 @@
         android:title="@string/clear_translation"
         />
 
+    <item
+        android:id="@+id/action_update_capability"
+        android:icon="@drawable/ic_update_white_24dp"
+        android:title="@string/update_capability"
+        app:showAsAction="ifRoom"
+        />
+
 </menu>

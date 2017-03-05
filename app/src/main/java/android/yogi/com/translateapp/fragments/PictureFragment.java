@@ -1,4 +1,4 @@
-package fragments;
+package android.yogi.com.translateapp.fragments;
 
 import android.content.Context;
 import android.graphics.Bitmap;

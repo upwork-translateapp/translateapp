@@ -1,4 +1,4 @@
-package utils;
+package android.yogi.com.translateapp.utils;
 
 import android.app.Activity;
 import android.content.Context;

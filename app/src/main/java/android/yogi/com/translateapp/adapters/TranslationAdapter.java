@@ -1,9 +1,9 @@
-package android.yogi.com.translateapp.activities.adapters;
+package android.yogi.com.translateapp.adapters;
 
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.yogi.com.translateapp.activities.data.RowObj;
+import android.yogi.com.translateapp.data.RowObj;
 
 import java.util.ArrayList;
 
