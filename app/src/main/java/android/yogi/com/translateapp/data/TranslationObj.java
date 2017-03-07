@@ -25,7 +25,7 @@ public class TranslationObj extends RowObj {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View vi = convertView;
-        ViewHolder holder;
+        TransViewHolder holder;
 
         if(convertView==null){
             /****** Inflate tabitem.xml file for each row ( Defined below ) *******/
@@ -34,12 +34,12 @@ public class TranslationObj extends RowObj {
             vi = inflater.inflate(R.layout.row_translation, null);
 
             /****** View Holder Object to contain tabitem.xml file elements ******/
-            holder = new ViewHolder();
+            holder = new TransViewHolder();
             holder.text = (TextView) vi.findViewById(R.id.text);
 
             vi.setTag( holder );
         } else {
-            holder = (ViewHolder) vi.getTag();
+            holder = (TransViewHolder) vi.getTag();
         }
 
         holder.text.setText(this.text);
@@ -47,7 +47,7 @@ public class TranslationObj extends RowObj {
     }
 
     /********* Create a holder Class to contain inflated xml file elements *********/
-    public static class ViewHolder {
+    public static class TransViewHolder {
         public TextView text;
     }
 }

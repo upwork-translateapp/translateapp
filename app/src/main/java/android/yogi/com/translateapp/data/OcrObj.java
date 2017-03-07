@@ -30,7 +30,7 @@ public class OcrObj extends RowObj{
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View vi = convertView;
-        ViewHolder holder;
+        OcrViewHolder holder;
 
         if(convertView==null){
 
@@ -40,13 +40,13 @@ public class OcrObj extends RowObj{
             vi = inflater.inflate(R.layout.row_ocr, null);
 
             /****** View Holder Object to contain tabitem.xml file elements ******/
-            holder = new ViewHolder();
+            holder = new OcrViewHolder();
             holder.text = (TextView) vi.findViewById(R.id.text);
             holder.image = (ImageView) vi.findViewById(R.id.image);
 
             vi.setTag( holder );
         } else {
-            holder = (ViewHolder) vi.getTag();
+            holder = (OcrViewHolder) vi.getTag();
         }
 
         holder.text.setText(this.text);
@@ -56,7 +56,7 @@ public class OcrObj extends RowObj{
     }
 
     /********* Create a holder Class to contain inflated xml file elements *********/
-    public static class ViewHolder {
+    public static class OcrViewHolder {
         public TextView text;
         public ImageView image;
     }

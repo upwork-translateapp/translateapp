@@ -1,5 +1,6 @@
 package android.yogi.com.translateapp.activities;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -13,6 +14,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 import android.yogi.com.translateapp.R;
 import android.yogi.com.translateapp.consts.Consts;
@@ -249,7 +252,25 @@ public class MainActivity extends BaseActivity implements TranslateFragment.OnFr
             Log.d(LOG_TAG, "onEndofSpeech");
 
             if(sbResults != null && sbResults.length() > 0) {
-                addTranscriptRow(sbResults.toString(), this.isUserLang);
+                if(this.isUserLang) {
+                    addTranscriptRow(sbResults.toString(), this.isUserLang);
+                } else {
+                    if(getSupportFragmentManager().findFragmentById(R.id.flContent) instanceof TranslateFragment) {
+                        TranslateFragment frag = (TranslateFragment)
+                                getSupportFragmentManager().findFragmentById(R.id.flContent);
+
+                        String langCode = TranslateApp.getInstance().getTransLang();
+                        frag.addTranslateFromRow(langCode, sbResults.toString());
+                        String rowText = frag.makeTranslateFromStr(langCode, sbResults.toString());
+
+                        if(saveTranslateText.length() > 0) {
+                            saveTranslateText += "\n";
+                        }
+
+                        saveTranslateText += rowText;
+                    }
+                }
+
                 callGoogleToTranslate(sbResults.toString(), !this.isUserLang);
             }
         }
@@ -380,12 +401,22 @@ public class MainActivity extends BaseActivity implements TranslateFragment.OnFr
             String translatedText = (String) translation.get(Json.TRANSLATED_TEXT);
             String detectedSrcLang = (String) translation.get(Json.DETECTED_SRC_LANG);
 
-            addTranscriptRow(translatedText, isUserLang);
+            addTranslateRow(translatedText, isUserLang);
 
             uploadFirebaseTranslation(saveTranslateText);
         } catch(Exception e) {
             Log.e(LOG_TAG, "handleTranslateResponse: ", e);
         }
+    }
+
+    public void handleTranslateBtnPress(String text) {
+        View view = this.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+        addTranscriptRow(text, true);
+        callGoogleToTranslate(text, false);
     }
 
     public void makeAPIRequest(String url, final Urls.RequestType lang, final boolean isUserLang) {
@@ -422,26 +453,60 @@ public class MainActivity extends BaseActivity implements TranslateFragment.OnFr
         queue.add(stringRequest);
     }
 
+    public void addTranslateRow(String translatedText, boolean isUserLang) {
+        if(getSupportFragmentManager().findFragmentById(R.id.flContent) instanceof TranslateFragment) {
+            TranslateFragment frag = (TranslateFragment)
+                    getSupportFragmentManager().findFragmentById(R.id.flContent);
+
+            String transLang = "";
+            if(isUserLang) {
+                transLang = TranslateApp.getInstance().getUserLang();
+            } else {
+                transLang = TranslateApp.getInstance().getTransLang();
+            }
+
+            frag.addTranslateToRow(transLang, translatedText);
+
+
+            updateSaveText(translatedText, isUserLang);
+        }
+    }
+
+    public void updateSaveText(String translatedText, boolean isUserLang) {
+        if(getSupportFragmentManager().findFragmentById(R.id.flContent) instanceof TranslateFragment) {
+            TranslateFragment frag = (TranslateFragment)
+                    getSupportFragmentManager().findFragmentById(R.id.flContent);
+            String langCode = "";
+            String rowText = "";
+
+            if (isUserLang) {
+                langCode = TranslateApp.getInstance().getUserLang();
+                rowText = frag.makeTranslateFromStr(langCode, translatedText);
+            } else {
+                langCode = TranslateApp.getInstance().getTransLang();
+                rowText = frag.makeTranslateStr(langCode, translatedText);
+            }
+
+            if (saveTranslateText.length() > 0) {
+                saveTranslateText += "\n";
+            }
+
+            saveTranslateText += rowText;
+        }
+    }
+
     public void addTranscriptRow(String translatedText, boolean isUserLang) {
         if(getSupportFragmentManager().findFragmentById(R.id.flContent) instanceof TranslateFragment) {
             TranslateFragment frag = (TranslateFragment)
                     getSupportFragmentManager().findFragmentById(R.id.flContent);
 
-            String langCode = "";
             if(isUserLang) {
-                langCode = TranslateApp.getInstance().getUserLang();
                 frag.addTranslateFromRow(translatedText);
             } else {
-                langCode = TranslateApp.getInstance().getTransLang();
                 frag.addTranslateToRow(translatedText);
             }
 
-            if(saveTranslateText.length() > 0) {
-                saveTranslateText += "\n";
-            }
-
-            String rowText = frag.makeTranslateStr(langCode, translatedText);
-            saveTranslateText += rowText;
+            updateSaveText(translatedText, isUserLang);
         }
     }
 

@@ -37,15 +37,6 @@ public class TranslateFragment extends BaseFragment {
 
     private static final String LOG_TAG = TranslateFragment.class.getName();
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    protected static final String ARG_PARAM1 = "param1";
-    protected static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
     private EditText translateEt;
 
     private ImageView iSpeakIcon;
@@ -78,8 +69,6 @@ public class TranslateFragment extends BaseFragment {
     public static TranslateFragment newInstance(String param1, String param2) {
         TranslateFragment fragment = new TranslateFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -89,8 +78,6 @@ public class TranslateFragment extends BaseFragment {
         super.onCreate(savedInstanceState);
         if (savedInstanceState == null) {
             if (getArguments() != null) {
-                mParam1 = getArguments().getString(ARG_PARAM1);
-                mParam2 = getArguments().getString(ARG_PARAM2);
             }
         }
     }
@@ -129,8 +116,7 @@ public class TranslateFragment extends BaseFragment {
                 String text = translateEt.getText().toString();
 
                 MainActivity activity = (MainActivity) getActivity();
-                activity.addTranscriptRow(text, true);
-                activity.callGoogleToTranslate(text, false);
+                activity.handleTranslateBtnPress(text);
             }
         });
 
@@ -239,10 +225,15 @@ public class TranslateFragment extends BaseFragment {
         addTranslateFromRow(TranslateApp.getInstance().getUserLang(), text);
     }
 
-    public void addTranslateFromRow(String lang, String text) {
-        String display = "{" + lang + "} - " + text;
+    public void addTransRowToListView(String display) {
         TranslationObj transObj = new TranslationObj(display);
         listAdapter.addRow(transObj);
+        //listview.setSelection(listAdapter.getCount() - 1);
+    }
+
+    public void addTranslateFromRow(String lang, String text) {
+        String display = makeTranslateFromStr(lang, text);
+        addTransRowToListView(display);
     }
 
     public void addTranslateToRow(String text) {
@@ -251,14 +242,19 @@ public class TranslateFragment extends BaseFragment {
 
     public void addTranslateToRow(String lang, String text) {
         String display = makeTranslateStr(lang, text);
-        TranslationObj transObj = new TranslationObj(display);
-        listAdapter.addRow(transObj);
+        addTransRowToListView(display);
     }
 
     public void addOcrRow(Bitmap bm, String ocr, String fromLang, String toLang) {
         String display = makeOcrStr(ocr, fromLang, toLang);
-        OcrObj transObj = new OcrObj(bm, display);
-        listAdapter.addRow(transObj);
+        OcrObj ocrObj = new OcrObj(bm, display);
+        listAdapter.addRow(ocrObj);
+        //listview.setSelection(listAdapter.getCount() - 1);
+    }
+
+    public String makeTranslateFromStr(String lang, String text) {
+        String display = "{" + lang + "} - " + text;
+        return display;
     }
 
     public String makeTranslateStr(String lang, String text) {

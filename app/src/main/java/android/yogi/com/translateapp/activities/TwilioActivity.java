@@ -27,6 +27,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.yogi.com.translateapp.R;
+import android.yogi.com.translateapp.consts.Consts;
 import android.yogi.com.translateapp.ui.Dialog;
 import android.yogi.com.translateapp.utils.Utils;
 
@@ -41,8 +42,6 @@ import com.twilio.client.Twilio;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static android.yogi.com.translateapp.consts.Consts.TWILIO_TOKEN_URL;
 
 /**
  * Created by Paul on 3/3/17.
@@ -194,10 +193,8 @@ public class TwilioActivity extends AppCompatActivity implements DeviceListener,
      */
     private void createDevice(String capabilityToken) {
         try {
-            Toast.makeText(TwilioActivity.this, "createDevice 1", Toast.LENGTH_SHORT).show();
 
             if (clientDevice == null) {
-                Toast.makeText(TwilioActivity.this, "createDevice 2", Toast.LENGTH_SHORT).show();
                 clientDevice = Twilio.createDevice(capabilityToken, this);
 
                 /*
@@ -278,7 +275,7 @@ public class TwilioActivity extends AppCompatActivity implements DeviceListener,
     private void retrieveCapabilityToken(final ClientProfile newClientProfile) {
 
         // Correlate desired properties of the Device (from ClientProfile) to properties of the Capability Token
-        Uri.Builder b = Uri.parse(TWILIO_TOKEN_URL).buildUpon();
+        Uri.Builder b = Uri.parse(Consts.TWILIO_TOKEN_URL).buildUpon();
         if (newClientProfile.isAllowOutgoing()) {
             b.appendQueryParameter("allowOutgoing", newClientProfile.allowOutgoing ? "true" : "false");
         }
@@ -286,28 +283,19 @@ public class TwilioActivity extends AppCompatActivity implements DeviceListener,
             b.appendQueryParameter("client", newClientProfile.getName());
         }
 
-        Toast.makeText(TwilioActivity.this, "Get Token 1", Toast.LENGTH_SHORT).show();
-
         Ion.with(getApplicationContext())
                 .load(b.toString())
                 .asString()
                 .setCallback(new FutureCallback<String>() {
                     @Override
                     public void onCompleted(Exception e, String capabilityToken) {
-                        Toast.makeText(TwilioActivity.this, "Get Token 2", Toast.LENGTH_SHORT).show();
-
                         if (e == null) {
-                            Toast.makeText(TwilioActivity.this, "Get Token 3", Toast.LENGTH_SHORT).show();
-
-                            Log.d(TAG, capabilityToken);
-
                             // Update the current Client Profile to represent current properties
                             TwilioActivity.this.clientProfile = newClientProfile;
 
                             // Create a Device with the Capability Token
                             createDevice(capabilityToken);
                         } else {
-                            Log.e(TAG, "Error retrieving token: " + e.toString());
                             String toastMsg = TranslateApp.getInstance().getResources().getString(R.string.err_token);
 
                             if(!Utils.isNetworkAvailable()) {

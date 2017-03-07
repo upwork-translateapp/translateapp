@@ -19,6 +19,7 @@
         <activity
             android:name=".activities.MainActivity"
             android:label="@string/app_name"
+            android:windowSoftInputMode="stateHidden|adjustPan|stateUnchanged"
             android:launchMode="singleTask"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
