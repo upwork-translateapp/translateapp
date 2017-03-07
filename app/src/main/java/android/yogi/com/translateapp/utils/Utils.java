@@ -1,6 +1,9 @@
 package android.yogi.com.translateapp.utils;
 
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
 import android.yogi.com.translateapp.activities.TranslateApp;
 
@@ -17,6 +20,13 @@ public class Utils {
 
     public static boolean checkCallPhonePermission() {
         return checkPermission("android.permission.CALL_PHONE");
+    }
+
+    public static boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) TranslateApp.getInstance().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     public static String encodeParameter(String param) {

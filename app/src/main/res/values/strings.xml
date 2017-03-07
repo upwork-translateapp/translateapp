@@ -38,6 +38,10 @@
     <string name="client_name">client name</string>
     <string name="phone_number">phone number</string>
 
+    <string name="err_token">Error retrieving token.</string>
+    <string name="no_internet">Internet not detected, please ensure you are connected to the internet.</string>
+
+
     <string-array name="types">
         <item>Client</item>
         <item>Phone Number</item>

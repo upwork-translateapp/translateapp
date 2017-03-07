@@ -127,10 +127,10 @@ public class TranslateFragment extends BaseFragment {
             @Override
             public void onClick(View v) {
                 String text = translateEt.getText().toString();
-                addTranslateFromRow(text);
 
                 MainActivity activity = (MainActivity) getActivity();
-                activity.callGoogleToTranslate(text);
+                activity.addTranscriptRow(text, true);
+                activity.callGoogleToTranslate(text, false);
             }
         });
 

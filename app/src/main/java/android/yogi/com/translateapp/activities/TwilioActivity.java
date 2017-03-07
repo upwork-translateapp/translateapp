@@ -28,6 +28,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.yogi.com.translateapp.R;
 import android.yogi.com.translateapp.ui.Dialog;
+import android.yogi.com.translateapp.utils.Utils;
 
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
@@ -193,7 +194,10 @@ public class TwilioActivity extends AppCompatActivity implements DeviceListener,
      */
     private void createDevice(String capabilityToken) {
         try {
+            Toast.makeText(TwilioActivity.this, "createDevice 1", Toast.LENGTH_SHORT).show();
+
             if (clientDevice == null) {
+                Toast.makeText(TwilioActivity.this, "createDevice 2", Toast.LENGTH_SHORT).show();
                 clientDevice = Twilio.createDevice(capabilityToken, this);
 
                 /*
@@ -282,13 +286,19 @@ public class TwilioActivity extends AppCompatActivity implements DeviceListener,
             b.appendQueryParameter("client", newClientProfile.getName());
         }
 
+        Toast.makeText(TwilioActivity.this, "Get Token 1", Toast.LENGTH_SHORT).show();
+
         Ion.with(getApplicationContext())
                 .load(b.toString())
                 .asString()
                 .setCallback(new FutureCallback<String>() {
                     @Override
                     public void onCompleted(Exception e, String capabilityToken) {
+                        Toast.makeText(TwilioActivity.this, "Get Token 2", Toast.LENGTH_SHORT).show();
+
                         if (e == null) {
+                            Toast.makeText(TwilioActivity.this, "Get Token 3", Toast.LENGTH_SHORT).show();
+
                             Log.d(TAG, capabilityToken);
 
                             // Update the current Client Profile to represent current properties
@@ -298,7 +308,13 @@ public class TwilioActivity extends AppCompatActivity implements DeviceListener,
                             createDevice(capabilityToken);
                         } else {
                             Log.e(TAG, "Error retrieving token: " + e.toString());
-                            Toast.makeText(TwilioActivity.this, "Error retrieving token", Toast.LENGTH_SHORT).show();
+                            String toastMsg = TranslateApp.getInstance().getResources().getString(R.string.err_token);
+
+                            if(!Utils.isNetworkAvailable()) {
+                                toastMsg += TranslateApp.getInstance().getResources().getString(R.string.no_internet);
+                            }
+
+                            Toast.makeText(TwilioActivity.this, toastMsg, Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
@@ -321,6 +337,7 @@ public class TwilioActivity extends AppCompatActivity implements DeviceListener,
             activeConnection = clientDevice.connect(params, this);
             setCallUI();
         } else {
+            updateClientProfileDialog();
             Toast.makeText(TwilioActivity.this, "No existing device", Toast.LENGTH_SHORT).show();
         }
     }
@@ -467,8 +484,9 @@ public class TwilioActivity extends AppCompatActivity implements DeviceListener,
                 boolean allowIncoming = incomingCheckBox.isChecked();
 
                 ClientProfile newClientProfile = new ClientProfile(clientName, allowOutgoing, allowIncoming);
-                alertDialog.dismiss();
                 retrieveCapabilityToken(newClientProfile);
+
+                alertDialog.dismiss();
             }
         };
     }
@@ -631,7 +649,7 @@ public class TwilioActivity extends AppCompatActivity implements DeviceListener,
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.menu_twilio, menu);
         return true;
     }
 

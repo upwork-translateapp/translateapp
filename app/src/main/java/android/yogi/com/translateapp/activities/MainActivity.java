@@ -13,6 +13,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.widget.Toast;
 import android.yogi.com.translateapp.R;
 import android.yogi.com.translateapp.consts.Consts;
 import android.yogi.com.translateapp.consts.Json;
@@ -37,10 +38,12 @@ import com.google.firebase.storage.UploadTask.TaskSnapshot;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends BaseActivity implements TranslateFragment.OnFragmentInteractionListener{
 
@@ -54,8 +57,14 @@ public class MainActivity extends BaseActivity implements TranslateFragment.OnFr
 
     private static final String TRANS_DIR = "translations";
     private static final String OCR_DIR = "ocr";
+    private static final String STORAGE_REFERENCE = "reference";
 
     public static ArrayList<String> langs = new ArrayList<String>();
+
+    private static final String txtEnding = ".txt";
+    private static final String pngEnding = ".png";
+
+    private String saveTranslateText = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,72 +88,120 @@ public class MainActivity extends BaseActivity implements TranslateFragment.OnFr
         startActivity(i);
     }
 
-    private String generateFileName(String dir){
+    private String generateFileName(String dir, String fileEnding){
         long ts = System.currentTimeMillis();
-        String fileName = dir + ts + ".txt";
-        return fileName;
+        String fileName = ts + fileEnding;
+        String fullFileName = dir + "/" + fileName;
+        return fullFileName;
     }
 
     public void uploadOcrToFireBase(String text, Bitmap bm) {
-        StorageReference rootRef = mStorageRef.getRoot();
-        String fileName = generateFileName(OCR_DIR);
-        StorageReference fileRef = rootRef.child(fileName);
+        String fileNamePng = generateFileName(OCR_DIR, pngEnding);
+        String fileNameTxt = fileNamePng.replace(pngEnding, txtEnding);
 
-        uploadTranslationToFireBase(text);
+        String translateText = "imageName=" + fileNamePng + " translation=" + text;
+        try {
+            uploadBytesToFireBase(translateText.getBytes("UTF-8"), fileNameTxt);
+        } catch (UnsupportedEncodingException e){
+            Log.e(LOG_TAG, "uploadOcrToFireBase: ", e);
+            Toast.makeText(this, "Err uploading to OCR FireBase " + e.toString(), Toast.LENGTH_LONG).show();
+        }
+
+        //Upload image to Firebase
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bm.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        byte[] bytes = stream.toByteArray();
+
+        uploadBytesToFireBase(bytes, fileNamePng);
     }
 
-    public void uploadTranslationToFireBase(String text) {
-        StorageReference rootRef = mStorageRef.getRoot();
-        String fileName = generateFileName(TRANS_DIR);
-        StorageReference fileRef = rootRef.child(fileName);
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
 
-        try {
-            byte[] bytes = text.getBytes("UTF-8");
-            UploadTask uploadTask = fileRef.putBytes(bytes);
-            uploadTask.addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    displayAlertDialog("Err uploading to FireBase " + e.toString());
-                    Log.e(LOG_TAG, "uploadFileToFireBase: onFailure" + e.toString());
-                }
-            }).addOnSuccessListener(new OnSuccessListener<TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
-                    Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                    Log.e(LOG_TAG, "downloadUrl" + downloadUrl.toString());
-                }
-            });
-        } catch (UnsupportedEncodingException e){
-            Log.e(LOG_TAG, "uploadFileToFireBase: ", e);
-            displayAlertDialog("Err uploading to FireBase " + e.toString());
+        // If there's an upload in progress, save the reference so you can query it later
+        if (mStorageRef != null) {
+            outState.putString(STORAGE_REFERENCE, mStorageRef.toString());
         }
     }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        // If there was an upload in progress, get its reference and create a new StorageReference
+        final String stringRef = savedInstanceState.getString(STORAGE_REFERENCE);
+        if (stringRef == null) {
+            return;
+        }
+        mStorageRef = FirebaseStorage.getInstance().getReferenceFromUrl(stringRef);
+
+        // Find all UploadTasks under this StorageReference (in this example, there should be one)
+        List<UploadTask> tasks = mStorageRef.getActiveUploadTasks();
+        if (tasks.size() > 0) {
+            // Get the task monitoring the upload
+            UploadTask task = tasks.get(0);
+
+            task.addOnSuccessListener(this, new OnSuccessListener<TaskSnapshot>() {
+                @Override
+                public void onSuccess(TaskSnapshot taskSnapshot) {
+
+                }
+            });
+        }
+    }
+
+    public void uploadFirebaseTranslation(String text) {
+        try {
+            uploadBytesToFireBase(text.getBytes("UTF-8"), generateFileName(TRANS_DIR, txtEnding));
+            saveTranslateText = "";
+        } catch (UnsupportedEncodingException e) {
+            Log.e(LOG_TAG, "uploadFirebaseTranslation: -", e);
+        }
+    }
+
+    public void uploadBytesToFireBase(byte[] bytes, String fileName) {
+        StorageReference fileRef = mStorageRef.child(fileName);
+
+        UploadTask uploadTask = fileRef.putBytes(bytes);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(MainActivity.this, "uploadFileToFireBase: onFailure" + e.toString(), Toast.LENGTH_LONG).show();
+                Log.e(LOG_TAG, "uploadFileToFireBase: onFailure" + e.toString());
+            }
+        }).addOnSuccessListener(new OnSuccessListener<TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+                Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                Log.e(LOG_TAG, "downloadUrl" + downloadUrl.toString());
+            }
+        });
+    }
+
+    private AlertDialog builder;
 
     private void displayAlertDialog(String errMsg) {
         String error = TranslateApp.getInstance().getResources().getString(R.string.error);
         String ok = TranslateApp.getInstance().getResources().getString(R.string.ok);
 
-        new AlertDialog.Builder(this)
-                .setTitle(error)
-                .setMessage(errMsg)
-                .setPositiveButton(ok, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
-                })
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .show();
+        if(builder != null && !builder.isShowing()) {
+            builder = new AlertDialog.Builder(this)
+                    .setTitle(error)
+                    .setMessage(errMsg)
+                    .setPositiveButton(ok, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+        }
     }
 
     public void getTextFromVoice(boolean isUserLang){
         if (sr.isRecognitionAvailable(this)) {
-            if(isUserLang) {
-                String lang = TranslateApp.getInstance().getUserLang();
-                sr.setRecognitionListener(new SpeechListener(lang));
-            } else {
-                String lang = TranslateApp.getInstance().getTransLang();
-                sr.setRecognitionListener(new SpeechListener(lang));
-            }
+            sr.setRecognitionListener(new SpeechListener(isUserLang));
             Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
             intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
             intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, "voice.recognition.test");
@@ -153,7 +210,7 @@ public class MainActivity extends BaseActivity implements TranslateFragment.OnFr
             sr.startListening(intent);
         } else {
             String errMsg = TranslateApp.getInstance().getResources().getString(R.string.no_speech_recognition);
-            displayAlertDialog(errMsg);
+            Toast.makeText(this, errMsg, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -163,24 +220,17 @@ public class MainActivity extends BaseActivity implements TranslateFragment.OnFr
 
     public class SpeechListener implements RecognitionListener  {
 
-        public String lang;
+        public boolean isUserLang;
 
-        private StringBuilder sb = new StringBuilder();
         private StringBuilder sbResults = new StringBuilder();
 
-        public SpeechListener(String lang) {
-            this.lang = lang;
+        public SpeechListener(boolean isUserLang) {
+            this.isUserLang = isUserLang;
         }
 
         public void onReadyForSpeech(Bundle params) {
             Log.d(LOG_TAG, "onReadyForSpeech");
-            sb.setLength(0);
             sbResults.setLength(0);
-
-            String txtFromSpeech = TranslateApp.getInstance().getResources().getString(R.string.text_from_speech);
-            StringBuilder sb = new StringBuilder();
-            sb.append(txtFromSpeech);
-            sb.append(" ");
         }
 
         public void onBeginningOfSpeech() {
@@ -198,16 +248,10 @@ public class MainActivity extends BaseActivity implements TranslateFragment.OnFr
         public void onEndOfSpeech() {
             Log.d(LOG_TAG, "onEndofSpeech");
 
-            sb.append(sbResults.toString());
-            sb.append("\n");
-
-            String translatedSpeech = TranslateApp.getInstance().getResources().getString(R.string.translated_speech);
-            sb.append(" ");
-            sb.append(translatedSpeech);
-            sb.append("\n");
-
-            addTranslatedRow(sb.toString());
-            callGoogleToTranslate(sbResults.toString(), this.lang);
+            if(sbResults != null && sbResults.length() > 0) {
+                addTranscriptRow(sbResults.toString(), this.isUserLang);
+                callGoogleToTranslate(sbResults.toString(), !this.isUserLang);
+            }
         }
 
         public void onError(int error) {
@@ -216,12 +260,13 @@ public class MainActivity extends BaseActivity implements TranslateFragment.OnFr
         }
 
         public void onResults(Bundle results) {
-            ArrayList data = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+            ArrayList<String> data = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
             for (int i = 0; i < data.size(); i++) {
-                sbResults.append(data.get(i));
+                String nextData = data.get(i);
+                if(nextData != null && nextData.length() > 0) {
+                    sbResults.append(nextData);
+                }
             }
-
-            Log.e(LOG_TAG, "result= " + sbResults.toString());
         }
 
         public void onPartialResults(Bundle partialResults) {
@@ -229,7 +274,6 @@ public class MainActivity extends BaseActivity implements TranslateFragment.OnFr
         }
 
         public void onEvent(int eventType, Bundle params) {
-            Log.d(LOG_TAG, "onEvent " + eventType);
         }
     }
 
@@ -268,25 +312,27 @@ public class MainActivity extends BaseActivity implements TranslateFragment.OnFr
         }
     }
 
-    public void callGoogleToTranslate(String text) {
-        callGoogleToTranslate(text, TranslateApp.getInstance().getTransLang());
-    }
-
-    public void callGoogleToTranslate(String text, String requestedLang) {
+    public void callGoogleToTranslate(String text, boolean isUserLang) {
         try {
+            String requestedLang = "";
+            if(isUserLang) {
+                requestedLang = TranslateApp.getInstance().getUserLang();
+            } else {
+                requestedLang = TranslateApp.getInstance().getTransLang();
+            }
             String encodedText = Utils.encodeParameter(text);
             String urlParams = "?key=" + Consts.GOOGLE_TRANSLATE_API_KEY + "&target=" + requestedLang + "&q=" + encodedText;
             URL url = new URL(Urls.GOOGLE_TRANSLATE + urlParams);
             String strUrl = url.toString();
 
-            makeAPIRequest(strUrl, Urls.RequestType.TRANSLATE);
+            makeAPIRequest(strUrl, Urls.RequestType.TRANSLATE, isUserLang);
         } catch (MalformedURLException e){
             Log.e(LOG_TAG, "callGoogleToTranslate: ", e);
         }
     }
 
     public void callGoogleForLangs() {
-        makeAPIRequest(Urls.GOOGLE_LANGS, Urls.RequestType.LANGS);
+        makeAPIRequest(Urls.GOOGLE_LANGS, Urls.RequestType.LANGS, true);
     }
 
     private void handleLangsResponse(String response) {
@@ -312,7 +358,7 @@ public class MainActivity extends BaseActivity implements TranslateFragment.OnFr
         }
     }
 
-    private void handleTranslateResponse(String response){
+    private void handleTranslateResponse(String response, boolean isUserLang){
         /**
          Sample Response from Google Translate API
          {
@@ -334,16 +380,15 @@ public class MainActivity extends BaseActivity implements TranslateFragment.OnFr
             String translatedText = (String) translation.get(Json.TRANSLATED_TEXT);
             String detectedSrcLang = (String) translation.get(Json.DETECTED_SRC_LANG);
 
-            addTranslatedRow(translatedText);
+            addTranscriptRow(translatedText, isUserLang);
 
-            //TODO Here upload to Firebase
-            uploadTranslationToFireBase(translatedText);
+            uploadFirebaseTranslation(saveTranslateText);
         } catch(Exception e) {
             Log.e(LOG_TAG, "handleTranslateResponse: ", e);
         }
     }
 
-    public void makeAPIRequest(String url, final Urls.RequestType lang) {
+    public void makeAPIRequest(String url, final Urls.RequestType lang, final boolean isUserLang) {
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(this);
 
@@ -355,12 +400,21 @@ public class MainActivity extends BaseActivity implements TranslateFragment.OnFr
                         if(Urls.RequestType.LANGS.ordinal() == lang.ordinal()) {
                             handleLangsResponse(response);
                         } else if(Urls.RequestType.TRANSLATE.ordinal() == lang.ordinal()) {
-                            handleTranslateResponse(response);
+                            handleTranslateResponse(response, isUserLang);
                         }
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                String errMsg = error.toString();
+                if(!Utils.isNetworkAvailable()) {
+                    errMsg += " " + TranslateApp.getInstance().getResources().getString(R.string.no_internet);
+                }
+
+                Toast.makeText(MainActivity.this,
+                        errMsg,
+                        Toast.LENGTH_LONG).show();
+
                 Log.e(LOG_TAG, "onErrorResponse: "+ error.toString());
             }
         });
@@ -368,14 +422,26 @@ public class MainActivity extends BaseActivity implements TranslateFragment.OnFr
         queue.add(stringRequest);
     }
 
-    private void addTranslatedRow(String translatedText) {
+    public void addTranscriptRow(String translatedText, boolean isUserLang) {
         if(getSupportFragmentManager().findFragmentById(R.id.flContent) instanceof TranslateFragment) {
             TranslateFragment frag = (TranslateFragment)
                     getSupportFragmentManager().findFragmentById(R.id.flContent);
-            frag.addTranslateToRow(translatedText);
 
-            String saveTranslateText = frag.makeTranslateStr(TranslateApp.getInstance().getTransLang(), translatedText);
-            uploadTranslationToFireBase(saveTranslateText);
+            String langCode = "";
+            if(isUserLang) {
+                langCode = TranslateApp.getInstance().getUserLang();
+                frag.addTranslateFromRow(translatedText);
+            } else {
+                langCode = TranslateApp.getInstance().getTransLang();
+                frag.addTranslateToRow(translatedText);
+            }
+
+            if(saveTranslateText.length() > 0) {
+                saveTranslateText += "\n";
+            }
+
+            String rowText = frag.makeTranslateStr(langCode, translatedText);
+            saveTranslateText += rowText;
         }
     }
 
