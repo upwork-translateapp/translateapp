@@ -15,9 +15,10 @@ public class Consts {
     public static final String TWILIO_CALL_URL = TWILIO_BASE_URL + "call";
     public static final String HELP_PHONE_NUMBER = "5102993767";
 
-
     //Google Constants
     public static final String GOOGLE_TRANSLATE_API_KEY = "AIzaSyClRYmzUmH--NNqjbYsfRUQ7yrpNhtoHfk";
+
+    public static final String OCR_API_KEY = "e5d4b9123688957";
 
     public static final String ENGLISH_CODE = "en";
     public static final String SPANISH_CODE = "es";

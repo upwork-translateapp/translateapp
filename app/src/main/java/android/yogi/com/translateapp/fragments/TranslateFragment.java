@@ -262,7 +262,7 @@ public class TranslateFragment extends BaseFragment {
         return display;
     }
 
-    public String makeOcrStr(String ocr, String fromLang, String toLang) {
+    public static String makeOcrStr(String ocr, String fromLang, String toLang) {
         String display = "{" + fromLang + "} > {" + toLang + "} - " + ocr;
         return display;
     }

@@ -21,7 +21,10 @@ import android.yogi.com.translateapp.R;
 import android.yogi.com.translateapp.consts.Consts;
 import android.yogi.com.translateapp.consts.Json;
 import android.yogi.com.translateapp.consts.Urls;
+import android.yogi.com.translateapp.consts.Urls.RequestType;
 import android.yogi.com.translateapp.fragments.TranslateFragment;
+import android.yogi.com.translateapp.tasks.IOCRCallBack;
+import android.yogi.com.translateapp.tasks.OCRAsyncTask;
 import android.yogi.com.translateapp.utils.ImagePicker;
 import android.yogi.com.translateapp.utils.Utils;
 
@@ -48,7 +51,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends BaseActivity implements TranslateFragment.OnFragmentInteractionListener{
+public class MainActivity extends BaseActivity implements IOCRCallBack, TranslateFragment.OnFragmentInteractionListener{
 
     private static final String LOG_TAG = MainActivity.class.getName();
 
@@ -67,11 +70,18 @@ public class MainActivity extends BaseActivity implements TranslateFragment.OnFr
     private static final String txtEnding = ".txt";
     private static final String pngEnding = ".png";
 
+    private IOCRCallBack mIOCRCallBack;
+    private Bitmap ocrImage;
+
     private String saveTranslateText = "";
+
+    private String ocrFileName = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mIOCRCallBack = this;
 
         setContentView(R.layout.activity_main);
 
@@ -98,10 +108,19 @@ public class MainActivity extends BaseActivity implements TranslateFragment.OnFr
         return fullFileName;
     }
 
-    public void uploadOcrToFireBase(String text, Bitmap bm) {
-        String fileNamePng = generateFileName(OCR_DIR, pngEnding);
-        String fileNameTxt = fileNamePng.replace(pngEnding, txtEnding);
+    public void uploadOcrImageToFireBase(Bitmap bm) {
+        ocrFileName = generateFileName(OCR_DIR, pngEnding);
 
+        //Upload image to Firebase
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bm.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        byte[] bytes = stream.toByteArray();
+
+        uploadImageBytesToFireBase(bytes, ocrFileName);
+    }
+
+    public void uploadOcrTextToFireBase(String fileNamePng, String text) {
+        String fileNameTxt = fileNamePng.replace(pngEnding, txtEnding);
         String translateText = "imageName=" + fileNamePng + " translation=" + text;
         try {
             uploadBytesToFireBase(translateText.getBytes("UTF-8"), fileNameTxt);
@@ -110,12 +129,6 @@ public class MainActivity extends BaseActivity implements TranslateFragment.OnFr
             Toast.makeText(this, "Err uploading to OCR FireBase " + e.toString(), Toast.LENGTH_LONG).show();
         }
 
-        //Upload image to Firebase
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bm.compress(Bitmap.CompressFormat.PNG, 100, stream);
-        byte[] bytes = stream.toByteArray();
-
-        uploadBytesToFireBase(bytes, fileNamePng);
     }
 
     @Override
@@ -179,6 +192,34 @@ public class MainActivity extends BaseActivity implements TranslateFragment.OnFr
                 // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
                 Uri downloadUrl = taskSnapshot.getDownloadUrl();
                 Log.e(LOG_TAG, "downloadUrl" + downloadUrl.toString());
+            }
+        });
+    }
+
+    public void uploadImageBytesToFireBase(byte[] bytes, final String fileName) {
+        StorageReference fileRef = mStorageRef.child(fileName);
+
+        UploadTask uploadTask = fileRef.putBytes(bytes);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(MainActivity.this, "uploadFileToFireBase: onFailure" + e.toString(), Toast.LENGTH_LONG).show();
+                Log.e(LOG_TAG, "uploadFileToFireBase: onFailure" + e.toString());
+            }
+        }).addOnSuccessListener(new OnSuccessListener<TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+                Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                Log.e(LOG_TAG, "downloadUrl" + downloadUrl.toString());
+
+                //Now send this out to the OCR API.
+                String url = downloadUrl.toString();
+                boolean isOverlayRequired = false;
+                String lang = getOcrLang();
+                OCRAsyncTask oCRAsyncTask = new OCRAsyncTask(MainActivity.this, Urls.OCR_API_KEY, isOverlayRequired,
+                        url, lang, mIOCRCallBack, fileName);
+                oCRAsyncTask.execute();
             }
         });
     }
@@ -271,7 +312,7 @@ public class MainActivity extends BaseActivity implements TranslateFragment.OnFr
                     }
                 }
 
-                callGoogleToTranslate(sbResults.toString(), !this.isUserLang);
+                callGoogleToTranslate(sbResults.toString(), !this.isUserLang, Urls.RequestType.TRANSLATE);
             }
         }
 
@@ -333,7 +374,7 @@ public class MainActivity extends BaseActivity implements TranslateFragment.OnFr
         }
     }
 
-    public void callGoogleToTranslate(String text, boolean isUserLang) {
+    public void callGoogleToTranslate(String text, boolean isUserLang, Urls.RequestType type) {
         try {
             String requestedLang = "";
             if(isUserLang) {
@@ -346,7 +387,7 @@ public class MainActivity extends BaseActivity implements TranslateFragment.OnFr
             URL url = new URL(Urls.GOOGLE_TRANSLATE + urlParams);
             String strUrl = url.toString();
 
-            makeAPIRequest(strUrl, Urls.RequestType.TRANSLATE, isUserLang);
+            makeAPIRequest(strUrl, type, isUserLang);
         } catch (MalformedURLException e){
             Log.e(LOG_TAG, "callGoogleToTranslate: ", e);
         }
@@ -354,6 +395,23 @@ public class MainActivity extends BaseActivity implements TranslateFragment.OnFr
 
     public void callGoogleForLangs() {
         makeAPIRequest(Urls.GOOGLE_LANGS, Urls.RequestType.LANGS, true);
+    }
+
+    @Override
+    public void getOCRCallBackResult(String response, String filename) {
+        Log.e(LOG_TAG, "getOCRCallBackResult flow 0");
+        try {
+            if (response != null) {
+                JSONObject resultObj = new JSONObject(response);
+                JSONArray parsedResults =resultObj.getJSONArray("ParsedResults");
+                JSONObject parsedResult = parsedResults.getJSONObject(0);
+                String parsedText = parsedResult.getString("ParsedText");
+
+                callGoogleToTranslate(parsedText, false, RequestType.TRANSLATE_OCR);
+            }
+        } catch (Exception e){
+            Log.e(LOG_TAG, "getOCRCallBackResult: ", e);
+        }
     }
 
     private void handleLangsResponse(String response) {
@@ -416,10 +474,55 @@ public class MainActivity extends BaseActivity implements TranslateFragment.OnFr
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
         addTranscriptRow(text, true);
-        callGoogleToTranslate(text, false);
+        callGoogleToTranslate(text, false, Urls.RequestType.TRANSLATE);
     }
 
     public void makeAPIRequest(String url, final Urls.RequestType lang, final boolean isUserLang) {
+        makeAPIRequest(url, lang, isUserLang, null);
+    }
+
+    public void handleTranslateOcrResponse(String response){
+        /**
+         Sample Response from Google Translate API
+         {
+         "data": {
+         "translations": [
+         {
+         "translatedText": "Pruebas",
+         "detectedSourceLanguage": "en"
+         }
+         ]
+         }
+         }
+         */
+        try {
+            JSONObject jsonObj = new JSONObject(response);
+            JSONObject dataObj = jsonObj.getJSONObject(Json.DATA);
+            JSONArray translations = dataObj.getJSONArray(Json.TRANSLATIONS);
+            JSONObject translation = (JSONObject) translations.get(0);
+            String translatedText = (String) translation.get(Json.TRANSLATED_TEXT);
+            String detectedSrcLang = (String) translation.get(Json.DETECTED_SRC_LANG);
+
+            Log.e(LOG_TAG, "getOCRCallBackResult OCR Text =" + translatedText);
+
+            String fromLang = TranslateApp.getInstance().getUserLang();
+            String toLang = TranslateApp.getInstance().getTransLang();
+            String txtFilename = ocrFileName.replace(pngEnding, txtEnding);
+            String saveOcrText = TranslateFragment.makeOcrStr(translatedText, fromLang, toLang);
+
+            try {
+                uploadBytesToFireBase(saveOcrText.getBytes("UTF-8"), txtFilename);
+            } catch (UnsupportedEncodingException e) {
+                Log.e(LOG_TAG, "getOCRCallBackResult:", e);
+            }
+
+            updateOcrUi(ocrImage, translatedText);
+        } catch(Exception e) {
+            Log.e(LOG_TAG, "handleTranslateResponse: ", e);
+        }
+    }
+
+    public void makeAPIRequest(String url, final Urls.RequestType lang, final boolean isUserLang, final Bitmap bm) {
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(this);
 
@@ -432,7 +535,10 @@ public class MainActivity extends BaseActivity implements TranslateFragment.OnFr
                             handleLangsResponse(response);
                         } else if(Urls.RequestType.TRANSLATE.ordinal() == lang.ordinal()) {
                             handleTranslateResponse(response, isUserLang);
+                        } else if(RequestType.TRANSLATE_OCR.ordinal() == lang.ordinal()) {
+                            handleTranslateOcrResponse(response);
                         }
+
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -442,9 +548,7 @@ public class MainActivity extends BaseActivity implements TranslateFragment.OnFr
                     errMsg += " " + TranslateApp.getInstance().getResources().getString(R.string.no_internet);
                 }
 
-                Toast.makeText(MainActivity.this,
-                        errMsg,
-                        Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_LONG).show();
 
                 Log.e(LOG_TAG, "onErrorResponse: "+ error.toString());
             }
@@ -466,7 +570,6 @@ public class MainActivity extends BaseActivity implements TranslateFragment.OnFr
             }
 
             frag.addTranslateToRow(transLang, translatedText);
-
 
             updateSaveText(translatedText, isUserLang);
         }
@@ -510,9 +613,63 @@ public class MainActivity extends BaseActivity implements TranslateFragment.OnFr
         }
     }
 
+    public String getOcrLang() {
+        String userLang = TranslateApp.getInstance().getUserLang();
+
+        if(userLang.equals("en")) {
+            return "eng";
+        } else if(userLang.equals("es")) {
+            return "spa";
+        } else if(userLang.equals("da")) {
+            return "dan";
+        } else if(userLang.equals("nl")) {
+            return "dut";
+        } else if(userLang.equals("fi")) {
+            return "fin";
+        } else if(userLang.equals("fr")) {
+            return "fre";
+        } else if(userLang.equals("de")) {
+            return "ger";
+        } else if(userLang.equals("el")) {
+            return "gre";
+        } else if(userLang.equals("hu")) {
+            return "hun";
+        } else if(userLang.equals("ko")) {
+            return "kor";
+        } else if(userLang.equals("it")) {
+            return "ita";
+        } else if(userLang.equals("ja")) {
+            return "jpn";
+        } else if(userLang.equals("no")) {
+            return "nor";
+        } else if(userLang.equals("pl")) {
+            return "pol";
+        } else if(userLang.equals("pt")) {
+            return "por";
+        } else if(userLang.equals("ru")) {
+            return "rus";
+        } else if(userLang.equals("ru")) {
+            return "sv";
+        } else if(userLang.equals("tr")) {
+            return "tur";
+        } else if(userLang.equals("zh-CN")) {
+            return "chs";
+        } else if(userLang.equals("zh-TW")) {
+            return "cht";
+        }
+
+        return "eng";
+    }
+
     public void callGoogleOcr(Bitmap bitmap) {
+        ocrImage = bitmap;
+        uploadOcrImageToFireBase(ocrImage);
+    }
+
+    public void updateOcrUi(Bitmap bitmap, String ocrText) {
         if(getSupportFragmentManager().findFragmentById(R.id.flContent) instanceof TranslateFragment) {
-            String ocrText = "RESPONSE FROM GOOGLE";
+
+            //Make API call to OCR API
 
             TranslateFragment frag = (TranslateFragment)
                     getSupportFragmentManager().findFragmentById(R.id.flContent);
@@ -521,9 +678,6 @@ public class MainActivity extends BaseActivity implements TranslateFragment.OnFr
             String toLang = TranslateApp.getInstance().getTransLang();
 
             frag.addOcrRow(bitmap, ocrText, fromLang, toLang);
-
-            String saveOcrText = frag.makeOcrStr(ocrText, fromLang, toLang);
-            uploadOcrToFireBase(saveOcrText, bitmap);
         }
     }
 }
