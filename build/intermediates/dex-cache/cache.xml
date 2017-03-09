@@ -43,7 +43,7 @@
         jumboMode="true"
         optimize="true"
         revision="23.0.3"
-        sha1="49b45578ab74accad02c2e41e81161b4b1f3c8db">
+        sha1="a556b4996a4d15a6e1ba817b0021e8592b881c9d">
         <dex dex="/Users/Paul/Desktop/CodeBases/upwork/translateapp/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run-bootstrap_1ac47d8145ceaf4873fd6fc5ded874a12f66d09b/classes.dex" />
     </item>
     <item
@@ -52,7 +52,7 @@
         jumboMode="true"
         optimize="true"
         revision="23.0.3"
-        sha1="04619f478111f8dea3eafa91d8d35a5bde46837f">
+        sha1="47fdafb18f015351b44b38827a85a4aa15ee3fa8">
         <dex dex="/Users/Paul/Desktop/CodeBases/upwork/translateapp/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run_659e04503cd752c61b9d761a5a6a5b506a0337c4/classes.dex" />
     </item>
     <item

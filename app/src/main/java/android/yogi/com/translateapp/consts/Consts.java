@@ -12,13 +12,11 @@ public class Consts {
     public static final String TWILIO_AUTH_TOKEN = "7cc6fb5e75d0391aa28ed35c58a25f97";
     public static final String TWILIO_BASE_URL = "https://upworktranslateapp.herokuapp.com/";
     public static final String TWILIO_TOKEN_URL = TWILIO_BASE_URL + "token";
-    public static final String TWILIO_CALL_URL = TWILIO_BASE_URL + "call";
-    public static final String HELP_PHONE_NUMBER = "5102993767";
+    public static final String HELP_PHONE_NUMBER = "4087535856";
 
     //Google Constants
+    //TODO this needs to be updated.
     public static final String GOOGLE_TRANSLATE_API_KEY = "AIzaSyClRYmzUmH--NNqjbYsfRUQ7yrpNhtoHfk";
-
-    public static final String OCR_API_KEY = "e5d4b9123688957";
 
     public static final String ENGLISH_CODE = "en";
     public static final String SPANISH_CODE = "es";

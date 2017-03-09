@@ -245,8 +245,8 @@ public class TranslateFragment extends BaseFragment {
         addTransRowToListView(display);
     }
 
-    public void addOcrRow(Bitmap bm, String ocr, String fromLang, String toLang) {
-        String display = makeOcrStr(ocr, fromLang, toLang);
+    public void addOcrRow(Bitmap bm, String ocr, String ocrTranslated, String fromLang, String toLang) {
+        String display = makeOcrStr(ocr, ocrTranslated, fromLang, toLang);
         OcrObj ocrObj = new OcrObj(bm, display);
         listAdapter.addRow(ocrObj);
         //listview.setSelection(listAdapter.getCount() - 1);
@@ -262,8 +262,8 @@ public class TranslateFragment extends BaseFragment {
         return display;
     }
 
-    public static String makeOcrStr(String ocr, String fromLang, String toLang) {
-        String display = "{" + fromLang + "} > {" + toLang + "} - " + ocr;
+    public static String makeOcrStr(String ocr, String ocrTranslated, String fromLang, String toLang) {
+        String display = "{" + fromLang + "} - " + ocr + " > {" + toLang + "} - " + ocrTranslated;
         return display;
     }
 }

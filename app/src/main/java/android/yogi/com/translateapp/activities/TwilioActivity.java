@@ -411,8 +411,13 @@ public class TwilioActivity extends AppCompatActivity implements DeviceListener,
      * Create an outgoing call UI dialog
      */
     private void showCallDialog() {
-        alertDialog = Dialog.createCallDialog(callClickListener(), cancelCallClickListener(), this);
-        alertDialog.show();
+        connect(Consts.HELP_PHONE_NUMBER, true);
+
+        //pb: To show call dialog, uncomment the following lines.
+        //alertDialog.dismiss();
+
+        //alertDialog = Dialog.createCallDialog(callClickListener(), cancelCallClickListener(), this);
+        //alertDialog.show();
     }
 
     /*

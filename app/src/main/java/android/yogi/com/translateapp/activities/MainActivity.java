@@ -126,7 +126,7 @@ public class MainActivity extends BaseActivity implements IOCRCallBack, Translat
             uploadBytesToFireBase(translateText.getBytes("UTF-8"), fileNameTxt);
         } catch (UnsupportedEncodingException e){
             Log.e(LOG_TAG, "uploadOcrToFireBase: ", e);
-            Toast.makeText(this, "Err uploading to OCR FireBase " + e.toString(), Toast.LENGTH_LONG).show();
+            //Toast.makeText(this, "Err uploading to OCR FireBase " + e.toString(), Toast.LENGTH_LONG).show();
         }
 
     }
@@ -183,7 +183,7 @@ public class MainActivity extends BaseActivity implements IOCRCallBack, Translat
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Toast.makeText(MainActivity.this, "uploadFileToFireBase: onFailure" + e.toString(), Toast.LENGTH_LONG).show();
+                //Toast.makeText(MainActivity.this, "uploadFileToFireBase: onFailure" + e.toString(), Toast.LENGTH_LONG).show();
                 Log.e(LOG_TAG, "uploadFileToFireBase: onFailure" + e.toString());
             }
         }).addOnSuccessListener(new OnSuccessListener<TaskSnapshot>() {
@@ -203,7 +203,7 @@ public class MainActivity extends BaseActivity implements IOCRCallBack, Translat
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Toast.makeText(MainActivity.this, "uploadFileToFireBase: onFailure" + e.toString(), Toast.LENGTH_LONG).show();
+                //Toast.makeText(MainActivity.this, "uploadFileToFireBase: onFailure" + e.toString(), Toast.LENGTH_LONG).show();
                 Log.e(LOG_TAG, "uploadFileToFireBase: onFailure" + e.toString());
             }
         }).addOnSuccessListener(new OnSuccessListener<TaskSnapshot>() {
@@ -397,6 +397,8 @@ public class MainActivity extends BaseActivity implements IOCRCallBack, Translat
         makeAPIRequest(Urls.GOOGLE_LANGS, Urls.RequestType.LANGS, true);
     }
 
+    private String parsedText = "";
+
     @Override
     public void getOCRCallBackResult(String response, String filename) {
         Log.e(LOG_TAG, "getOCRCallBackResult flow 0");
@@ -405,7 +407,7 @@ public class MainActivity extends BaseActivity implements IOCRCallBack, Translat
                 JSONObject resultObj = new JSONObject(response);
                 JSONArray parsedResults =resultObj.getJSONArray("ParsedResults");
                 JSONObject parsedResult = parsedResults.getJSONObject(0);
-                String parsedText = parsedResult.getString("ParsedText");
+                parsedText = parsedResult.getString("ParsedText");
 
                 callGoogleToTranslate(parsedText, false, RequestType.TRANSLATE_OCR);
             }
@@ -508,7 +510,7 @@ public class MainActivity extends BaseActivity implements IOCRCallBack, Translat
             String fromLang = TranslateApp.getInstance().getUserLang();
             String toLang = TranslateApp.getInstance().getTransLang();
             String txtFilename = ocrFileName.replace(pngEnding, txtEnding);
-            String saveOcrText = TranslateFragment.makeOcrStr(translatedText, fromLang, toLang);
+            String saveOcrText = TranslateFragment.makeOcrStr(parsedText, translatedText, fromLang, toLang);
 
             try {
                 uploadBytesToFireBase(saveOcrText.getBytes("UTF-8"), txtFilename);
@@ -516,7 +518,7 @@ public class MainActivity extends BaseActivity implements IOCRCallBack, Translat
                 Log.e(LOG_TAG, "getOCRCallBackResult:", e);
             }
 
-            updateOcrUi(ocrImage, translatedText);
+            updateOcrUi(ocrImage, parsedText, translatedText);
         } catch(Exception e) {
             Log.e(LOG_TAG, "handleTranslateResponse: ", e);
         }
@@ -666,7 +668,7 @@ public class MainActivity extends BaseActivity implements IOCRCallBack, Translat
         uploadOcrImageToFireBase(ocrImage);
     }
 
-    public void updateOcrUi(Bitmap bitmap, String ocrText) {
+    public void updateOcrUi(Bitmap bitmap, String ocrText, String ocrTranslatedText) {
         if(getSupportFragmentManager().findFragmentById(R.id.flContent) instanceof TranslateFragment) {
 
             //Make API call to OCR API
@@ -677,7 +679,7 @@ public class MainActivity extends BaseActivity implements IOCRCallBack, Translat
             String fromLang = TranslateApp.getInstance().getUserLang();
             String toLang = TranslateApp.getInstance().getTransLang();
 
-            frag.addOcrRow(bitmap, ocrText, fromLang, toLang);
+            frag.addOcrRow(bitmap, ocrText, ocrTranslatedText, fromLang, toLang);
         }
     }
 }
