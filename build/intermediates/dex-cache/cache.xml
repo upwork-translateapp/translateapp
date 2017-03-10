@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        is-multidex="true"
+        jar="/Users/Paul/Desktop/CodeBases/upwork/translateapp/app/build/intermediates/incremental-classes/debug/instant-run-bootstrap.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.0"
+        sha1="83eef2bb9987a61b4458f129b9b9f9dca7624c61">
+        <dex dex="/Users/Paul/Desktop/CodeBases/upwork/translateapp/app/build/intermediates/transforms/dex/debug/folders/1000/10000/instant-run-bootstrap_1ac47d8145ceaf4873fd6fc5ded874a12f66d09b/classes.dex" />
+    </item>
+
+</items>

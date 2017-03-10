@@ -10,7 +10,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:860306964676:android:2ce36a64d1c65b51",
         "android_client_info": {
-          "package_name": "android.yogi.com.translateapp"
+          "package_name": "yogi.com.translateapp"
         }
       },
       "oauth_client": [
@@ -18,7 +18,7 @@
           "client_id": "860306964676-kr12h62sq1c2l6jdgqdte0otm86inu49.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "android.yogi.com.translateapp",
+            "package_name": "yogi.com.translateapp",
             "certificate_hash": "c4d0b27f6c37d36b6e792f894a42a02923a38e2e"
           }
         },

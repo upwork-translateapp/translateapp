@@ -4,7 +4,7 @@ android {
     compileSdkVersion 23
     buildToolsVersion '25.0.0'
     defaultConfig {
-        applicationId "android.yogi.com.translateapp"
+        applicationId "yogi.com.translateapp"
         minSdkVersion 21
         targetSdkVersion 23
         versionCode 1
