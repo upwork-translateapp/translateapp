@@ -51,6 +51,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.speech.tts.TextToSpeech;
+
 public class MainActivity extends BaseActivity implements IOCRCallBack, TranslateFragment.OnFragmentInteractionListener{
 
     private static final String LOG_TAG = MainActivity.class.getName();
@@ -264,12 +266,14 @@ public class MainActivity extends BaseActivity implements IOCRCallBack, Translat
         } else {
             langCode = TranslateApp.getInstance().getTransLang();
         }
+
+        String pleaseSpeak = TranslateApp.getInstance().getString(R.string.please_speak);
+
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, langCode);
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
-                "Say Something");
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, pleaseSpeak);
         try {
             startActivityForResult(intent, SPEECH_ACTIVITY_CODE);
         } catch (ActivityNotFoundException a) {
