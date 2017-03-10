@@ -131,7 +131,7 @@ public class TranslateFragment extends BaseFragment {
                     activity.getTextFromVoice(true);
                 } else if (event.getAction() == MotionEvent.ACTION_UP){
                     MainActivity activity = (MainActivity) getActivity();
-                    activity.stopListening();
+                    //activity.stopListening();
                 }
                 return true;
             }
@@ -146,7 +146,7 @@ public class TranslateFragment extends BaseFragment {
                     activity.getTextFromVoice(false);
                 } else if (event.getAction() == MotionEvent.ACTION_UP){
                     MainActivity activity = (MainActivity) getActivity();
-                    activity.stopListening();
+                    //activity.stopListening();
                 }
                 return true;
             }

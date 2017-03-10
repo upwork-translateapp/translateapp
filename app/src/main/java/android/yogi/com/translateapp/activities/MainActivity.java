@@ -1,14 +1,14 @@
 package android.yogi.com.translateapp.activities;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
-import android.speech.SpeechRecognizer;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -56,8 +56,7 @@ public class MainActivity extends BaseActivity implements IOCRCallBack, Translat
     private static final String LOG_TAG = MainActivity.class.getName();
 
     private static final int PICK_IMAGE_ID = 123;
-
-    private SpeechRecognizer sr;
+    private static final int SPEECH_ACTIVITY_CODE = 100;
 
     private StorageReference mStorageRef;
 
@@ -90,8 +89,6 @@ public class MainActivity extends BaseActivity implements IOCRCallBack, Translat
         launchTranslateFragment();
 
         callGoogleForLangs();
-
-        sr = SpeechRecognizer.createSpeechRecognizer(this);
 
         mStorageRef = FirebaseStorage.getInstance().getReference();
     }
@@ -128,7 +125,6 @@ public class MainActivity extends BaseActivity implements IOCRCallBack, Translat
             Log.e(LOG_TAG, "uploadOcrToFireBase: ", e);
             //Toast.makeText(this, "Err uploading to OCR FireBase " + e.toString(), Toast.LENGTH_LONG).show();
         }
-
     }
 
     @Override
@@ -243,66 +239,60 @@ public class MainActivity extends BaseActivity implements IOCRCallBack, Translat
         }
     }
 
-    public void getTextFromVoice(boolean isUserLang){
-        if (sr.isRecognitionAvailable(this)) {
-            sr.setRecognitionListener(new SpeechListener(isUserLang));
-            Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-            intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, "voice.recognition.test");
+    /**
+     * Showing google speech input dialog
+     * */
+    private boolean setUserLangForSpeech;
 
-            intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5);
-            sr.startListening(intent);
+    public void getTextFromVoice(boolean isUserLang) {
+        // Check to see if a recognition activity is present
+        PackageManager pm = getPackageManager();
+        List activities = pm.queryIntentActivities(
+                new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
+        if (activities.size() == 0) {
+            Toast.makeText(getApplicationContext(),
+                    "Speech not found on device",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        setUserLangForSpeech = isUserLang;
+
+        String langCode;
+        if (isUserLang) {
+            langCode = TranslateApp.getInstance().getUserLang();
         } else {
-            String errMsg = TranslateApp.getInstance().getResources().getString(R.string.no_speech_recognition);
-            Toast.makeText(this, errMsg, Toast.LENGTH_LONG).show();
+            langCode = TranslateApp.getInstance().getTransLang();
+        }
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, langCode);
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
+                "Say Something");
+        try {
+            startActivityForResult(intent, SPEECH_ACTIVITY_CODE);
+        } catch (ActivityNotFoundException a) {
+            Toast.makeText(getApplicationContext(),
+                    "Speech not supported",
+                    Toast.LENGTH_SHORT).show();
         }
     }
 
-    public void stopListening() {
-        sr.stopListening();
-    }
-
-    public class SpeechListener implements RecognitionListener  {
-
-        public boolean isUserLang;
-
-        private StringBuilder sbResults = new StringBuilder();
-
-        public SpeechListener(boolean isUserLang) {
-            this.isUserLang = isUserLang;
-        }
-
-        public void onReadyForSpeech(Bundle params) {
-            Log.d(LOG_TAG, "onReadyForSpeech");
-            sbResults.setLength(0);
-        }
-
-        public void onBeginningOfSpeech() {
-            Log.d(LOG_TAG, "onBeginningOfSpeech");
-        }
-
-        public void onRmsChanged(float rmsdB) {
-            Log.d(LOG_TAG, "onRmsChanged");
-        }
-
-        public void onBufferReceived(byte[] buffer) {
-            Log.d(LOG_TAG, "onBufferReceived");
-        }
-
-        public void onEndOfSpeech() {
+        public void handleSpeechListenerResults(String results){
             Log.d(LOG_TAG, "onEndofSpeech");
 
-            if(sbResults != null && sbResults.length() > 0) {
-                if(this.isUserLang) {
-                    addTranscriptRow(sbResults.toString(), this.isUserLang);
+            if(results != null && results.length() > 0) {
+                if(setUserLangForSpeech) {
+                    addTranscriptRow(results, setUserLangForSpeech);
                 } else {
                     if(getSupportFragmentManager().findFragmentById(R.id.flContent) instanceof TranslateFragment) {
                         TranslateFragment frag = (TranslateFragment)
                                 getSupportFragmentManager().findFragmentById(R.id.flContent);
 
                         String langCode = TranslateApp.getInstance().getTransLang();
-                        frag.addTranslateFromRow(langCode, sbResults.toString());
-                        String rowText = frag.makeTranslateFromStr(langCode, sbResults.toString());
+                        frag.addTranslateFromRow(langCode, results);
+                        String rowText = frag.makeTranslateFromStr(langCode, results);
 
                         if(saveTranslateText.length() > 0) {
                             saveTranslateText += "\n";
@@ -312,32 +302,10 @@ public class MainActivity extends BaseActivity implements IOCRCallBack, Translat
                     }
                 }
 
-                callGoogleToTranslate(sbResults.toString(), !this.isUserLang, Urls.RequestType.TRANSLATE);
+                callGoogleToTranslate(results, !setUserLangForSpeech, Urls.RequestType.TRANSLATE);
             }
         }
 
-        public void onError(int error) {
-            String errMsg = "Error getting speech code=" + error;
-            displayAlertDialog(errMsg);
-        }
-
-        public void onResults(Bundle results) {
-            ArrayList<String> data = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-            for (int i = 0; i < data.size(); i++) {
-                String nextData = data.get(i);
-                if(nextData != null && nextData.length() > 0) {
-                    sbResults.append(nextData);
-                }
-            }
-        }
-
-        public void onPartialResults(Bundle partialResults) {
-            Log.d(LOG_TAG, "onPartialResults");
-        }
-
-        public void onEvent(int eventType, Bundle params) {
-        }
-    }
 
     private void launchTranslateFragment() {
         try {
@@ -359,9 +327,22 @@ public class MainActivity extends BaseActivity implements IOCRCallBack, Translat
         startActivityForResult(chooseImageIntent, PICK_IMAGE_ID);
     }
 
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch(requestCode) {
+            case 100: {
+                if (resultCode == RESULT_OK && null != data) {
+
+                    ArrayList<String> result = data
+                            .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                    String r = result.get(0);
+                    Log.e(LOG_TAG, "r = " + r);
+                    handleSpeechListenerResults(r);
+                }
+                break;
+            }
+
             case PICK_IMAGE_ID:
                 Bitmap bitmap = ImagePicker.getImageFromResult(this, resultCode, data);
                 if(bitmap != null && getSupportFragmentManager().findFragmentById(R.id.flContent) instanceof TranslateFragment) {
