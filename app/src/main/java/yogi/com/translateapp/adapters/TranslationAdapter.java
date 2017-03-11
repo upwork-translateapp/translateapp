@@ -6,6 +6,7 @@ import android.widget.BaseAdapter;
 
 import java.util.ArrayList;
 
+import yogi.com.translateapp.data.OcrObj;
 import yogi.com.translateapp.data.RowObj;
 
 /**
@@ -20,7 +21,10 @@ public class TranslationAdapter extends BaseAdapter {
 
     public enum ROW_TYPE {
         TRANSLATION,
-        OCR
+        OCR,
+
+        //This must be the last item.
+        COUNT
     }
 
     public TranslationAdapter() {
@@ -31,6 +35,21 @@ public class TranslationAdapter extends BaseAdapter {
     public void addRow(RowObj row) {
         data.add(row);
         notifyDataSetChanged();
+    }
+
+
+    @Override
+    public int getItemViewType(int position) {
+        if(data.get(position) instanceof OcrObj) {
+            return ROW_TYPE.OCR.ordinal();
+        } else {
+            return ROW_TYPE.TRANSLATION.ordinal();
+        }
+    }
+
+    @Override
+    public int getViewTypeCount() {
+        return ROW_TYPE.COUNT.ordinal();
     }
 
     public int getCount() {
